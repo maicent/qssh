@@ -30,8 +30,8 @@
       <template v-else>
         <!-- 已保存的连接 -->
         <div v-if="savedConnections.length > 0" class="connection-section">
-          <div class="section-header">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#68d391" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <div class="section-header saved-section">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
             <span class="section-title">已保存</span>
             <span class="section-count">{{ savedConnections.length }}</span>
           </div>
@@ -67,8 +67,8 @@
 
         <!-- 缓存的连接 -->
         <div v-if="cachedConnections.length > 0" class="connection-section">
-          <div class="section-header">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#718096" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div class="section-header cached-section">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             <span class="section-title">缓存</span>
             <span class="section-count">{{ cachedConnections.length }}</span>
           </div>
@@ -590,13 +590,13 @@ const openSettings = () => {
 
 .custom-menu {
   position: fixed;
-  background: rgba(45, 45, 45, 0.98);
+  background: var(--bg-panel);
   backdrop-filter: blur(20px);
-  border: 0.0625rem solid rgba(255, 255, 255, 0.15);
+  border: 0.0625rem solid var(--border-strong);
   border-radius: 0.5rem;
   padding: 0.25rem;
   min-width: 10rem;
-  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-md);
   z-index: 100000;
 }
 
@@ -605,7 +605,7 @@ const openSettings = () => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 0.8125rem;
   border-radius: 0.375rem;
   cursor: pointer;
@@ -613,7 +613,7 @@ const openSettings = () => {
 }
 
 .custom-menu .menu-item:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--surface-hover);
 }
 
 .custom-menu .menu-item svg {
@@ -622,70 +622,70 @@ const openSettings = () => {
 }
 
 .custom-menu .menu-item-primary {
-  color: #63b3ed;
+  color: var(--primary-light);
 }
 
 .custom-menu .menu-item-primary svg {
   opacity: 1;
-  fill: #63b3ed;
+  fill: var(--primary-light);
 }
 
 .custom-menu .menu-item-primary:hover {
-  background: rgba(66, 153, 225, 0.15);
+  background: var(--primary-bg);
 }
 
 .custom-menu .menu-sep {
   height: 1px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--border-subtle);
   margin: 0.25rem 0.5rem;
 }
 
 /* 编辑连接弹窗 */
 .edit-modal-mask {
   position: fixed; inset: 0;
-  background: rgba(0, 0, 0, 0.7); display: flex;
+  background: var(--bg-overlay); display: flex;
   align-items: center; justify-content: center;
   z-index: 10000; backdrop-filter: blur(4px);
 }
 .edit-modal {
-  background: #1a1a1a; border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-panel); border: 1px solid var(--border-default);
   border-radius: 0.75rem; width: 380px; max-width: 90vw;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-lg);
 }
 .edit-modal-head {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 1rem 1.25rem; border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-subtle);
 }
-.edit-modal-head h3 { margin: 0; color: #e2e8f0; font-size: 0.9375rem; }
-.edit-modal-head button { background: none; border: none; color: #718096; font-size: 1.25rem; cursor: pointer; }
-.edit-modal-head button:hover { color: #e2e8f0; }
+.edit-modal-head h3 { margin: 0; color: var(--text-primary); font-size: 0.9375rem; }
+.edit-modal-head button { background: none; border: none; color: var(--text-muted); font-size: 1.25rem; cursor: pointer; }
+.edit-modal-head button:hover { color: var(--text-primary); }
 .edit-modal-body { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
 .edit-modal-foot {
   display: flex; justify-content: flex-end; gap: 0.5rem;
-  padding: 0.875rem 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0.875rem 1.25rem; border-top: 1px solid var(--border-subtle);
 }
-.edit-field label { display: block; color: #a0aec0; font-size: 0.75rem; margin-bottom: 0.25rem; }
+.edit-field label { display: block; color: var(--text-secondary); font-size: 0.75rem; margin-bottom: 0.25rem; }
 .edit-input {
-  width: 100%; background: rgba(30, 30, 30, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.375rem;
-  color: #e2e8f0; font-size: 0.8125rem; padding: 0.5rem 0.75rem;
+  width: 100%; background: var(--bg-input);
+  border: 1px solid var(--border-default); border-radius: 0.375rem;
+  color: var(--text-primary); font-size: 0.8125rem; padding: 0.5rem 0.75rem;
   outline: none; box-sizing: border-box;
 }
-.edit-input:focus { border-color: rgba(66, 153, 225, 0.4); }
-.edit-error { color: #fc8181; font-size: 0.75rem; }
+.edit-input:focus { border-color: var(--border-accent); }
+.edit-error { color: var(--accent-danger); font-size: 0.75rem; }
 .edit-btn {
   display: inline-flex; align-items: center; gap: 0.375rem;
   padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
   border-radius: 0.375rem;
-  color: #a0aec0; font-size: 0.8125rem;
+  color: var(--text-secondary); font-size: 0.8125rem;
   cursor: pointer; transition: all 0.15s;
 }
-.edit-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.1); color: #e2e8f0; }
+.edit-btn:hover:not(:disabled) { background: var(--surface-hover); color: var(--text-primary); }
 .edit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.edit-btn-primary { background: rgba(66, 153, 225, 0.2); border-color: rgba(66, 153, 225, 0.4); color: #63b3ed; }
-.edit-btn-primary:hover:not(:disabled) { background: rgba(66, 153, 225, 0.35); }
+.edit-btn-primary { background: var(--primary-bg); border-color: var(--border-accent); color: var(--primary-light); }
+.edit-btn-primary:hover:not(:disabled) { background: var(--primary-bg-hover); }
 </style>
 
 <style scoped>
@@ -714,18 +714,18 @@ const openSettings = () => {
   left: 0.625rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #718096;
+  color: var(--text-muted);
   pointer-events: none;
 }
 
 .search-input {
   width: 100%;
   padding: 0.5rem 0.625rem 0.5rem 2rem;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--surface-2);
   backdrop-filter: blur(10px);
-  border: 0.0625rem solid rgba(255, 255, 255, 0.15);
+  border: 0.0625rem solid var(--border-default);
   border-radius: 0.375rem;
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 0.8125rem;
   outline: none;
   transition: all 0.2s;
@@ -733,13 +733,13 @@ const openSettings = () => {
 }
 
 .search-input::placeholder {
-  color: #718096;
+  color: var(--text-muted);
 }
 
 .search-input:focus {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(66, 153, 225, 0.5);
-  box-shadow: 0 0 0 0.125rem rgba(66, 153, 225, 0.15);
+  background: var(--surface-3);
+  border-color: var(--border-accent);
+  box-shadow: 0 0 0 0.125rem var(--primary-bg);
 }
 
 /* 连接列表 */
@@ -755,15 +755,15 @@ const openSettings = () => {
   align-items: center;
   justify-content: center;
   padding: 1.875rem 0.9375rem;
-  color: #718096;
+  color: var(--text-muted);
   text-align: center;
 }
 
 .spinner {
   width: 1.5rem;
   height: 1.5rem;
-  border: 0.125rem solid rgba(255, 255, 255, 0.1);
-  border-top-color: #4299e1;
+  border: 0.125rem solid var(--border-default);
+  border-top-color: var(--accent-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin-bottom: 0.5rem;
@@ -792,7 +792,7 @@ const openSettings = () => {
 }
 
 .group-title {
-  color: #a0aec0;
+  color: var(--text-secondary);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -800,9 +800,9 @@ const openSettings = () => {
 }
 
 .group-count {
-  color: #718096;
+  color: var(--text-muted);
   font-size: 0.6875rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-1);
   padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
 }
@@ -820,8 +820,16 @@ const openSettings = () => {
   user-select: none;
 }
 
+.section-header.saved-section {
+  color: var(--success-light);
+}
+
+.section-header.cached-section {
+  color: var(--text-muted);
+}
+
 .section-title {
-  color: #718096;
+  color: var(--text-muted);
   font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -829,9 +837,9 @@ const openSettings = () => {
 }
 
 .section-count {
-  color: #4a5568;
+  color: var(--text-disabled);
   font-size: 0.625rem;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface-1);
   padding: 0.0625rem 0.375rem;
   border-radius: 0.25rem;
 }
@@ -844,26 +852,26 @@ const openSettings = () => {
 
 .connection-item {
   padding: 0.625rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--surface-1);
   backdrop-filter: blur(10px);
-  border: 0.0625rem solid rgba(255, 255, 255, 0.08);
+  border: 0.0625rem solid var(--border-subtle);
   border-radius: 0.375rem;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .connection-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.15);
+  background: var(--surface-hover);
+  border-color: var(--border-default);
 }
 
 .connection-item.active {
-  background: rgba(66, 153, 225, 0.12);
-  border-color: rgba(66, 153, 225, 0.3);
+  background: var(--bg-selected);
+  border-color: var(--border-accent);
 }
 
 .connection-item.connected {
-  border-left: 3px solid #68d391;
+  border-left: 3px solid var(--accent-success);
 }
 
 .connection-item.cached {
@@ -885,7 +893,7 @@ const openSettings = () => {
 }
 
 .connection-name {
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 0.8125rem;
   font-weight: 600;
   text-align: left;
@@ -906,15 +914,15 @@ const openSettings = () => {
   background: transparent;
   border: none;
   border-radius: 0.25rem;
-  color: #718096;
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s;
   flex-shrink: 0;
 }
 
 .more-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #e2e8f0;
+  background: var(--surface-hover);
+  color: var(--text-primary);
 }
 
 .status-badge {
@@ -927,15 +935,15 @@ const openSettings = () => {
 }
 
 .status-badge.connected {
-  background: rgba(72, 187, 120, 0.15);
-  color: #48bb78;
-  border: 0.0625rem solid rgba(72, 187, 120, 0.3);
+  background: var(--success-bg);
+  color: var(--accent-success);
+  border: 0.0625rem solid color-mix(in srgb, var(--accent-success), transparent 70%);
 }
 
 .status-badge.disconnected {
-  background: rgba(160, 174, 192, 0.1);
-  color: #a0aec0;
-  border: 0.0625rem solid rgba(160, 174, 192, 0.2);
+  background: var(--surface-1);
+  color: var(--text-secondary);
+  border: 0.0625rem solid var(--border-default);
 }
 
 .connection-bottom {
@@ -948,7 +956,7 @@ const openSettings = () => {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: #718096;
+  color: var(--text-muted);
   font-size: 0.6875rem;
   font-family: 'Consolas', monospace;
 }
@@ -964,16 +972,16 @@ const openSettings = () => {
   gap: 0.375rem;
   flex-shrink: 0;
   padding-top: 0.625rem;
-  border-top: 0.0625rem solid rgba(255, 255, 255, 0.1);
+  border-top: 0.0625rem solid var(--border-default);
 }
 
 .icon-btn {
   flex: 1;
   padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 0.0625rem solid rgba(255, 255, 255, 0.1);
+  background: var(--surface-2);
+  border: 0.0625rem solid var(--border-default);
   border-radius: 0.375rem;
-  color: #a0aec0;
+  color: var(--text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -982,9 +990,9 @@ const openSettings = () => {
 }
 
 .icon-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: #e2e8f0;
+  background: var(--surface-hover);
+  border-color: var(--border-default);
+  color: var(--text-primary);
 }
 
 /* 滚动条样式 */
@@ -997,11 +1005,11 @@ const openSettings = () => {
 }
 
 .connection-list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--scrollbar-thumb);
   border-radius: 0.125rem;
 }
 
 .connection-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--scrollbar-thumb-hover);
 }
 </style>
