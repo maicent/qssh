@@ -137,8 +137,8 @@ onUnmounted(() => {
 <style scoped>
 .bottom-bar {
   height: 2.5rem;
-  background: var(--bg-toolbar);
-  border-top: 0.0625rem solid var(--border-default);
+  background: var(--toolbar-1);
+  border-top: 0.0625rem solid var(--surface-hover);
   padding: 0 1rem;
   display: flex;
   align-items: center;
@@ -168,6 +168,9 @@ onUnmounted(() => {
 .info-item {
   display: flex;
   gap: 1rem;
+}
+
+.info-item {
   color: var(--text-secondary);
   font-size: 0.75rem;
   white-space: nowrap;

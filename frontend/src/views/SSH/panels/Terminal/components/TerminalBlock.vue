@@ -250,14 +250,14 @@ function formatDuration(ms) {
 
 <style scoped>
 .terminal-block {
-  background: var(--surface-1);
+  background: var(--bg-panel-solid);
   border: 1px solid var(--border-default);
   border-radius: 0;
   overflow: hidden;
   transition: border-color .15s;
 }
 
-.terminal-block:hover { border-color: var(--border-strong); }
+.terminal-block:hover { border-color: var(--border-default); }
 
 /* 头部（含左侧竖线） */
 .block-header {
@@ -269,7 +269,7 @@ function formatDuration(ms) {
   user-select: none;
   background: var(--bg-toolbar);
   border-bottom: 1px solid var(--border-default);
-  border-left: 3px solid var(--border-strong);
+  border-left: 3px solid var(--surface-hover);
 }
 
 .command .block-header { border-left-color: var(--accent-success); }
@@ -286,7 +286,7 @@ function formatDuration(ms) {
 .block-icon { flex-shrink: 0; color: var(--text-muted); }
 .command .block-icon { color: var(--accent-success); }
 .error .block-icon { color: var(--accent-danger); }
-.system .block-icon { color: var(--text-secondary); }
+.system .block-icon { color: var(--text-muted); }
 
 .block-title { flex: 1; min-width: 0; }
 
@@ -297,7 +297,7 @@ function formatDuration(ms) {
   word-break: break-all;
 }
 
-.system-text { font-size: 12px; color: var(--text-secondary); }
+.system-text { font-size: 12px; color: var(--text-muted); }
 .type-label { font-size: 12px; color: var(--text-muted); }
 
 .block-meta {
@@ -316,13 +316,13 @@ function formatDuration(ms) {
   border-radius: 3px;
 }
 
-.status-badge.running { background: var(--warning-bg); color: var(--accent-warning); }
-.status-badge.success { background: var(--success-bg); color: var(--accent-success); }
-.status-badge.failed { background: var(--danger-bg); color: var(--accent-danger); }
+.status-badge.running { background: rgba(255,152,0,.12); color: var(--accent-warning); }
+.status-badge.success { background: rgba(76,175,80,.12); color: var(--accent-success); }
+.status-badge.failed { background: rgba(244,67,54,.12); color: var(--accent-danger); }
 
 .spinner {
   width: 10px; height: 10px;
-  border: 2px solid color-mix(in srgb, var(--accent-warning) 30%, transparent); border-top-color: var(--accent-warning);
+  border: 2px solid rgba(255,152,0,.3); border-top-color: var(--accent-warning);
   border-radius: 50%; animation: spin 1s linear infinite;
 }
 
@@ -362,7 +362,7 @@ function formatDuration(ms) {
   word-break: break-all;
 }
 
-.output-text { color: var(--text-secondary); }
+.output-text { color: var(--text-primary); }
 .error-text { color: var(--accent-danger); }
 .input-text { font-family: 'Cascadia Code', monospace; font-size: 12px; color: var(--accent-warning); }
 
@@ -395,7 +395,7 @@ function formatDuration(ms) {
 }
 
 .action-btn:hover { background: var(--surface-hover); color: var(--text-secondary); }
-.action-btn.delete:hover { background: var(--danger-bg); color: var(--accent-danger); }
+.action-btn.delete:hover { background: rgba(244,67,54,.15); color: var(--accent-danger); }
 
 /* 折叠动画 */
 .content-enter-active { transition: all .2s ease; }
@@ -405,7 +405,7 @@ function formatDuration(ms) {
 /* 滚动条 */
 .output-content::-webkit-scrollbar, .error-content::-webkit-scrollbar { width: 4px; }
 .output-content::-webkit-scrollbar-track, .error-content::-webkit-scrollbar-track { background: transparent; }
-.output-content::-webkit-scrollbar-thumb, .error-content::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 2px; }
+.output-content::-webkit-scrollbar-thumb, .error-content::-webkit-scrollbar-thumb { background: var(--surface-hover); border-radius: 2px; }
 
 /* 代码高亮 */
 .output-text :deep(.hljs-keyword),
@@ -428,8 +428,8 @@ function formatDuration(ms) {
 .output-text :deep(.hl-ip) { color: #c678dd; }
 .output-text :deep(.hl-number) { color: #d19a66; }
 .output-text :deep(.hl-unit) { color: #5c6370; }
-.output-text :deep(.hl-success) { color: #4caf50; font-weight: 600; }
-.output-text :deep(.hl-error) { color: #f44336; font-weight: 600; }
-.output-text :deep(.hl-warning) { color: #ff9800; font-weight: 600; }
+.output-text :deep(.hl-success) { color: var(--accent-success); font-weight: 600; }
+.output-text :deep(.hl-error) { color: var(--accent-danger); font-weight: 600; }
+.output-text :deep(.hl-warning) { color: var(--accent-warning); font-weight: 600; }
 .output-text :deep(.hl-perms) { color: #c678dd; font-family: monospace; }
 </style>

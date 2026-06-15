@@ -181,7 +181,7 @@ onUnmounted(() => {
 
 .terminal-placeholder {
   text-align: center;
-  color: var(--text-secondary);
+  color: #a0aec0;
 }
 
 .placeholder-content {
@@ -193,11 +193,10 @@ onUnmounted(() => {
 
 .icon {
   opacity: 0.3;
-  color: var(--text-secondary);
 }
 
 h3 {
-  color: var(--text-primary);
+  color: #e2e8f0;
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
@@ -206,15 +205,14 @@ h3 {
 p {
   font-size: 0.875rem;
   margin: 0;
-  color: var(--text-secondary);
 }
 
 /* 加载动画 */
 .loading-spinner {
   width: 3rem;
   height: 3rem;
-  border: 0.25rem solid color-mix(in srgb, var(--accent-primary) 20%, transparent);
-  border-top-color: var(--accent-primary);
+  border: 0.25rem solid rgba(66, 153, 225, 0.2);
+  border-top-color: #4299e1;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -236,20 +234,20 @@ p {
 .terminal-header {
   padding: 1rem 1.5rem;
   background: var(--bg-toolbar);
-  border-bottom: 0.0625rem solid var(--border-default);
+  border-bottom: 0.0625rem solid var(--surface-hover);
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
 .connection-badge {
-  color: var(--accent-success);
+  color: #48bb78;
   font-size: 0.875rem;
   font-weight: 500;
 }
 
 .connection-name {
-  color: var(--text-primary);
+  color: #e2e8f0;
   font-size: 0.9375rem;
   font-weight: 600;
 }
@@ -262,7 +260,7 @@ p {
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  color: var(--text-secondary);
+  color: #a0aec0;
 }
 
 .terminal-body p {
@@ -271,7 +269,7 @@ p {
 
 .hint {
   font-size: 0.875rem !important;
-  color: var(--text-muted);
+  color: #718096;
   font-style: italic;
 }
 </style>

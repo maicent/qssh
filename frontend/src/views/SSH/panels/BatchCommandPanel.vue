@@ -3,7 +3,7 @@
     <!-- 工具栏 -->
     <div class="bc-toolbar">
       <div class="bc-toolbar-left">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-warning">
           <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
           <line x1="12" y1="5" x2="20" y2="5"/>
         </svg>
@@ -97,9 +97,9 @@
       </div>
       <div class="bc-result-scroll">
         <div v-for="(r, i) in results" :key="i" class="bc-result-row">
-          <span class="bc-result-icon" :class="{ success: r.success, error: !r.success }">
-            <svg v-if="r.success" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-            <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span class="bc-result-icon">
+            <svg v-if="r.success" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-success"><polyline points="20 6 9 17 4 12"/></svg>
+            <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-danger"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
           </span>
           <span class="bc-result-name">{{ r.name }}</span>
           <span class="bc-result-msg">{{ r.success ? '已发送' : r.error }}</span>
@@ -255,24 +255,23 @@ onUnmounted(() => {
 /* 工具栏 */
 .bc-toolbar {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 14px; border-bottom: 1px solid var(--border-subtle);
-  background: var(--bg-toolbar); flex-shrink: 0;
+  padding: 10px 14px; border-bottom: 1px solid var(--border-default);
+  background: var(--toolbar-3); flex-shrink: 0;
 }
 .bc-toolbar-left { display: flex; align-items: center; gap: 8px; }
-.bc-toolbar-left svg { color: var(--accent-warning); }
 .bc-toolbar-right { display: flex; gap: 6px; }
 .bc-title { color: var(--text-primary); font-weight: 600; font-size: 14px; }
 
 .bc-btn {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 12px; background: var(--surface-2);
-  border: 1px solid var(--border-default); border-radius: 6px;
+  padding: 6px 12px; background: var(--border-subtle);
+  border: 1px solid var(--surface-hover); border-radius: 6px;
   color: var(--text-secondary); font-size: 12px; cursor: pointer; transition: all 0.15s;
 }
 .bc-btn:hover:not(:disabled) { background: var(--surface-hover); color: var(--text-primary); }
 .bc-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.bc-btn-primary { background: var(--warning-bg); border-color: color-mix(in srgb, var(--accent-warning), transparent 60%); color: var(--warning-light); }
-.bc-btn-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent-warning), transparent 80%); }
+.bc-btn-primary { background: var(--warning-bg); border-color: rgba(237,137,54,0.4); color: var(--warning-light); }
+.bc-btn-primary:hover:not(:disabled) { background: var(--warning-bg); }
 
 /* 目标区域 */
 .bc-targets {
@@ -296,11 +295,11 @@ onUnmounted(() => {
 }
 
 .bc-conn-card {
-  background: var(--surface-1); border: 1px solid var(--border-subtle);
+  background: var(--card-bg); border: 1px solid var(--border-subtle);
   border-radius: 8px; padding: 10px; cursor: pointer; transition: all 0.15s;
 }
-.bc-conn-card:hover { background: var(--surface-hover); border-color: var(--border-default); }
-.bc-conn-card.selected { border-color: color-mix(in srgb, var(--accent-warning), transparent 50%); background: color-mix(in srgb, var(--accent-warning), transparent 94%); }
+.bc-conn-card:hover { background: var(--card-bg); border-color: var(--border-default); }
+.bc-conn-card.selected { border-color: var(--border-warning); background: var(--warning-bg); }
 .bc-conn-card.offline { opacity: 0.5; cursor: not-allowed; }
 
 .bc-conn-head {
@@ -320,12 +319,12 @@ onUnmounted(() => {
 }
 .bc-term-label { font-size: 10px; color: var(--text-muted); white-space: nowrap; }
 .bc-term-dropdown {
-  flex: 1; background: var(--bg-input); border: 1px solid var(--border-subtle);
+  flex: 1; background: var(--bg-panel); border: 1px solid var(--border-default);
   border-radius: 4px; color: var(--text-primary); font-size: 11px; padding: 3px 6px;
   font-family: monospace; outline: none; cursor: pointer;
 }
-.bc-term-dropdown:focus { border-color: color-mix(in srgb, var(--accent-warning), transparent 60%); }
-.bc-term-dropdown option { background: var(--bg-panel); color: var(--text-primary); }
+.bc-term-dropdown:focus { border-color: rgba(237,137,54,0.4); }
+.bc-term-dropdown option { background: var(--bg-panel-solid); color: var(--text-primary); }
 
 /* 命令输入 */
 .bc-input-area {
@@ -333,12 +332,12 @@ onUnmounted(() => {
   display: flex; gap: 8px; align-items: stretch; flex-shrink: 0;
 }
 .bc-input {
-  flex: 1; background: var(--bg-input);
-  border: 1px solid var(--border-default); border-radius: 6px;
+  flex: 1; background: var(--bg-panel);
+  border: 1px solid var(--surface-hover); border-radius: 6px;
   color: var(--text-primary); font-size: 13px; font-family: 'Courier New', monospace;
   padding: 8px 10px; outline: none; resize: none;
 }
-.bc-input:focus { border-color: color-mix(in srgb, var(--accent-warning), transparent 60%); }
+.bc-input:focus { border-color: rgba(237,137,54,0.4); }
 .bc-input::placeholder { color: var(--text-disabled); }
 .bc-send-btn { align-self: stretch; white-space: nowrap; }
 
@@ -350,23 +349,26 @@ onUnmounted(() => {
 .bc-results-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 6px 14px; color: var(--text-secondary); font-size: 12px; font-weight: 600;
-  border-bottom: 1px solid var(--border-subtle); flex-shrink: 0;
+  border-bottom: 1px solid var(--surface-1); flex-shrink: 0;
 }
 .bc-result-scroll { overflow-y: auto; padding: 6px 14px; }
 .bc-result-row {
   display: flex; align-items: center; gap: 8px;
-  padding: 5px 0; border-bottom: 1px solid var(--border-subtle);
+  padding: 5px 0; border-bottom: 1px solid var(--surface-1);
 }
 .bc-result-icon { flex-shrink: 0; display: flex; }
-.bc-result-icon.success { color: var(--success-light); }
-.bc-result-icon.error { color: var(--danger-light); }
 .bc-result-name { color: var(--text-primary); font-size: 12px; font-weight: 500; min-width: 80px; }
 .bc-result-msg { color: var(--text-muted); font-size: 11px; flex: 1; }
+
+/* 图标颜色 */
+.icon-warning { color: var(--warning-light); }
+.icon-success { color: var(--success-light); }
+.icon-danger { color: var(--accent-danger); }
 
 /* 底部 */
 .bc-footer {
   display: flex; align-items: center; padding: 4px 14px;
-  border-top: 1px solid var(--border-subtle); background: var(--bg-toolbar);
+  border-top: 1px solid var(--border-default); background: var(--toolbar-3);
   font-size: 11px; color: var(--text-muted); flex-shrink: 0;
 }
 </style>

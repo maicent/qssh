@@ -3,7 +3,7 @@
     <!-- 顶部工具栏 -->
     <div class="pf-toolbar">
       <div class="pf-toolbar-left">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <svg class="pf-icon-accent" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
           <line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
@@ -21,7 +21,7 @@
     <!-- 转发列表 -->
     <div class="pf-list">
       <div v-if="forwards.length === 0" class="pf-empty">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <svg class="pf-icon-muted" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         <p>暂无端口转发规则</p>
         <button class="pf-btn pf-btn-primary pf-btn-sm" @click="closeDialog(); showAdd = true">添加转发</button>
       </div>
@@ -30,6 +30,7 @@
         <table class="pf-table">
           <thead>
             <tr>
+              <th>名称</th>
               <th>类型</th>
               <th>监听地址</th>
               <th>目标地址</th>
@@ -41,6 +42,9 @@
           </thead>
           <tbody>
             <tr v-for="fwd in forwards" :key="fwd.id" :class="'pf-row-' + fwd.status">
+              <td class="pf-name-cell" :title="getForwardName(fwd)">
+                {{ getForwardName(fwd) || '—' }}
+              </td>
               <td>
                 <span class="pf-type-tag" :class="'pf-type-' + fwd.type">
                   {{ fwd.type === 'local' ? '远程→本地' : '本地→远程' }}
@@ -99,6 +103,10 @@
             <button @click="closeDialog">&times;</button>
           </div>
           <div class="pf-modal-body">
+            <div class="pf-field">
+              <label>名称 <span class="pf-hint-inline">（可选，方便记录用途）</span></label>
+              <input v-model="form.name" placeholder="例如：数据库、Web服务、Redis" class="pf-input pf-input-full" />
+            </div>
             <div class="pf-field">
               <label>转发类型</label>
               <div class="pf-radio-group">
@@ -164,12 +172,29 @@ const formError = ref('')
 const editingId = ref(null)
 
 const form = ref({
+  name: '',
   type: 'local',
   bindAddr: '127.0.0.1',
   bindPort: null,
   remoteHost: '127.0.0.1',
   remotePort: null
 })
+
+// 名称存储（localStorage）
+const NAMES_KEY = 'pf_names'
+function loadNames() {
+  try { return JSON.parse(localStorage.getItem(NAMES_KEY) || '{}') } catch { return {} }
+}
+function saveName(fwd, name) {
+  if (!name) return
+  const names = loadNames()
+  names[fwd.id] = name
+  localStorage.setItem(NAMES_KEY, JSON.stringify(names))
+}
+function getForwardName(fwd) {
+  const names = loadNames()
+  return names[fwd.id] || ''
+}
 
 const runningCount = computed(() => forwards.value.filter(f => f.status === 'running').length)
 
@@ -201,6 +226,7 @@ const loadForwards = async () => {
 const editForward = (fwd) => {
   editingId.value = fwd.id
   form.value = {
+    name: getForwardName(fwd),
     type: fwd.type,
     bindAddr: fwd.bindAddr,
     bindPort: fwd.bindPort,
@@ -223,11 +249,20 @@ const addForward = async () => {
     if (editingId.value) {
       try {
         await PortForwardService.RemoveForward(editingId.value)
+        // 清除旧名称
+        const names = loadNames()
+        delete names[editingId.value]
+        localStorage.setItem(NAMES_KEY, JSON.stringify(names))
       } catch (e) {}
     }
 
     const fn = form.value.type === 'local' ? 'AddLocalForward' : 'AddRemoteForward'
-    await PortForwardService[fn](connId, form.value.bindAddr, form.value.bindPort, form.value.remoteHost, form.value.remotePort)
+    const result = await PortForwardService[fn](connId, form.value.bindAddr, form.value.bindPort, form.value.remoteHost, form.value.remotePort)
+
+    // 保存名称
+    if (form.value.name && result) {
+      saveName(result, form.value.name)
+    }
 
     const typeLabel = form.value.type === 'local' ? '远程→本地' : '本地→远程'
     addLog(connId, 'portForward', LogLevel.SUCCESS,
@@ -245,6 +280,7 @@ const addForward = async () => {
 const closeDialog = () => {
   showAdd.value = false
   editingId.value = null
+  form.value.name = ''
   form.value.bindPort = null
   form.value.remotePort = null
   form.value.bindAddr = '127.0.0.1'
@@ -280,6 +316,10 @@ const stopForward = async (id) => {
 const removeForward = async (id) => {
   try {
     await PortForwardService.RemoveForward(id)
+    // 清除名称
+    const names = loadNames()
+    delete names[id]
+    localStorage.setItem(NAMES_KEY, JSON.stringify(names))
     addLog(connId, 'portForward', LogLevel.INFO, '删除端口转发: ' + id)
     showMessage('转发已删除', 'success')
     await loadForwards()
@@ -321,8 +361,8 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border-default);
-  background: var(--surface-2);
+  border-bottom: 1px solid var(--surface-hover);
+  background: var(--toolbar-3);
   flex-shrink: 0;
 }
 
@@ -330,7 +370,14 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.pf-icon-accent {
   color: var(--primary-light);
+}
+
+.pf-icon-muted {
+  color: var(--text-disabled);
 }
 
 .pf-title {
@@ -378,14 +425,14 @@ onUnmounted(() => {
   text-align: left;
   color: var(--text-secondary);
   font-weight: 600;
-  border-bottom: 2px solid var(--border-default);
+  border-bottom: 2px solid var(--surface-hover);
   white-space: nowrap;
 }
 
 .pf-table td {
   padding: 0.5rem 0.75rem;
   color: var(--text-primary);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--surface-1);
   white-space: nowrap;
 }
 
@@ -395,11 +442,11 @@ onUnmounted(() => {
 }
 
 .pf-row-running td {
-  background: color-mix(in srgb, var(--accent-success), transparent 95%);
+  background: var(--success-bg);
 }
 
 .pf-row-error td {
-  background: color-mix(in srgb, var(--accent-danger), transparent 95%);
+  background: var(--danger-bg);
 }
 
 /* 连接和流量统计 */
@@ -418,7 +465,7 @@ onUnmounted(() => {
 }
 
 .pf-conn-total {
-  color: var(--text-muted);
+  color: var(--text-disabled);
   font-size: 0.5625rem;
 }
 
@@ -435,7 +482,7 @@ onUnmounted(() => {
 }
 
 .pf-traffic-sep {
-  color: var(--text-muted);
+  color: var(--text-disabled);
   margin: 0 0.125rem;
 }
 
@@ -454,7 +501,7 @@ onUnmounted(() => {
 }
 
 .pf-type-remote {
-  background: color-mix(in srgb, var(--accent-purple), transparent 80%);
+  background: var(--accent-purple-bg);
   color: var(--accent-purple);
 }
 
@@ -494,8 +541,8 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.375rem;
   padding: 0.375rem 0.75rem;
-  background: var(--surface-1);
-  border: 1px solid var(--border-default);
+  background: var(--border-subtle);
+  border: 1px solid var(--border-strong);
   border-radius: 0.375rem;
   color: var(--text-secondary);
   font-size: 0.75rem;
@@ -524,32 +571,32 @@ onUnmounted(() => {
 
 .pf-btn-success {
   background: var(--success-bg);
-  border-color: color-mix(in srgb, var(--accent-success), transparent 60%);
+  border-color: var(--border-success);
   color: var(--success-light);
 }
 
 .pf-btn-success:hover {
-  background: color-mix(in srgb, var(--accent-success), transparent 65%);
+  background: var(--success-bg);
 }
 
 .pf-btn-warn {
   background: var(--warning-bg);
-  border-color: color-mix(in srgb, var(--warning-light), transparent 60%);
+  border-color: var(--border-warning);
   color: var(--warning-light);
 }
 
 .pf-btn-warn:hover {
-  background: color-mix(in srgb, var(--warning-light), transparent 65%);
+  background: var(--warning-bg);
 }
 
 .pf-btn-danger {
   background: var(--danger-bg);
-  border-color: color-mix(in srgb, var(--accent-danger), transparent 60%);
+  border-color: var(--border-danger);
   color: var(--accent-danger);
 }
 
 .pf-btn-danger:hover {
-  background: color-mix(in srgb, var(--accent-danger), transparent 65%);
+  background: var(--danger-bg);
 }
 
 .pf-btn-text {
@@ -561,8 +608,8 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   padding: 0.375rem 1rem;
-  border-top: 1px solid var(--border-default);
-  background: var(--surface-2);
+  border-top: 1px solid var(--surface-hover);
+  background: var(--toolbar-3);
   color: var(--text-muted);
   font-size: 0.6875rem;
   flex-shrink: 0;
@@ -582,7 +629,7 @@ onUnmounted(() => {
 
 .pf-modal {
   background: var(--bg-panel-solid);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--surface-hover);
   border-radius: 0.75rem;
   width: 400px;
   max-width: 90vw;
@@ -635,8 +682,8 @@ onUnmounted(() => {
 }
 
 .pf-input {
-  background: var(--bg-input);
-  border: 1px solid var(--border-default);
+  background: var(--toolbar-4);
+  border: 1px solid var(--surface-hover);
   border-radius: 0.375rem;
   color: var(--text-primary);
   font-size: 0.8125rem;
@@ -657,6 +704,25 @@ onUnmounted(() => {
   width: 80px;
 }
 
+.pf-input-full {
+  width: 100%;
+}
+
+.pf-hint-inline {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.pf-name-cell {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+}
+
 .pf-radio-group {
   display: flex;
   gap: 0.5rem;
@@ -668,7 +734,7 @@ onUnmounted(() => {
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
   background: var(--surface-1);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--surface-hover);
   border-radius: 0.375rem;
   color: var(--text-secondary);
   font-size: 0.75rem;
@@ -678,7 +744,7 @@ onUnmounted(() => {
 }
 
 .pf-radio:hover {
-  background: var(--surface-2);
+  background: var(--border-subtle);
 }
 
 .pf-radio.active {
@@ -708,7 +774,7 @@ onUnmounted(() => {
 }
 
 .pf-hint {
-  color: var(--text-muted);
+  color: var(--text-disabled);
   font-size: 0.625rem;
   margin-bottom: 0.375rem;
 }
@@ -736,7 +802,7 @@ onUnmounted(() => {
 }
 
 .pf-list::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
+  background: var(--border-default);
   border-radius: 999px;
 }
 </style>

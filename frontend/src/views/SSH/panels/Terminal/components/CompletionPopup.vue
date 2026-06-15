@@ -108,10 +108,10 @@ defineExpose({ handleKey, selectedIndex })
 <style scoped>
 .completion-popup {
   position: fixed;
-  background: var(--bg-panel);
-  border: 1px solid var(--border-strong);
+  background: var(--bg-toolbar);
+  border: 1px solid var(--border-default);
   border-radius: 6px;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 16px var(--shadow-lg);
   max-height: 200px;
   overflow-y: auto;
   padding: 4px;
@@ -139,7 +139,7 @@ defineExpose({ handleKey, selectedIndex })
 }
 
 .suggestion-icon.command { color: var(--accent-success); }
-.suggestion-icon.subcommand { color: var(--text-secondary); }
+.suggestion-icon.subcommand { color: var(--text-muted); }
 .suggestion-icon.option { color: var(--accent-warning); }
 
 .suggestion-value {
@@ -158,5 +158,5 @@ defineExpose({ handleKey, selectedIndex })
 
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 2px; }
 </style>

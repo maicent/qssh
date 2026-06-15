@@ -30,8 +30,8 @@
       <template v-else>
         <!-- 已保存的连接 -->
         <div v-if="savedConnections.length > 0" class="connection-section">
-          <div class="section-header saved-section">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <div class="section-header">
+            <svg class="icon-success" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
             <span class="section-title">已保存</span>
             <span class="section-count">{{ savedConnections.length }}</span>
           </div>
@@ -67,8 +67,8 @@
 
         <!-- 缓存的连接 -->
         <div v-if="cachedConnections.length > 0" class="connection-section">
-          <div class="section-header cached-section">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div class="section-header">
+            <svg class="icon-muted" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             <span class="section-title">缓存</span>
             <span class="section-count">{{ cachedConnections.length }}</span>
           </div>
@@ -239,6 +239,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSSHConnectionsStore } from '../../../stores/sshConnections'
+import { useConfigStore } from '../../../stores/config'
 import { DeleteConnection, CreateAndConnectWithGroup, GetAllGroups, GetDefaultGroupID, OpenSSHWindow } from '../../../../bindings/changeme/ssh/sshservice.js'
 
 import { Events } from '@wailsio/runtime'
@@ -385,7 +386,7 @@ const quickConnect = async (conn) => {
   try {
     const groups = await GetAllGroups()
     for (const group of groups) {
-      if (group.conn_ids && group.conn_ids.length > 0) {
+      if (group && group.conn_ids && group.conn_ids.length > 0) {
         hasExistingWindow = true
         break
       }
@@ -396,8 +397,22 @@ const quickConnect = async (conn) => {
     // 没有窗口，直接用默认分组连接
     await executeQuickConnect('default-group')
   } else {
-    // 已有窗口，弹出选择对话框
-    showConnDialog.value = true
+    // 已有窗口，根据配置决定行为
+    const cfgStore = useConfigStore()
+    await cfgStore.init()
+    const groupBehavior = cfgStore.get('advanced', 'groupBehavior') || 'prompt'
+    console.log('[SidebarPanel] 📋 分组行为配置:', groupBehavior)
+
+    if (groupBehavior === 'join_default') {
+      console.log('[SidebarPanel] 🎯 自动加入默认分组')
+      await executeQuickConnect('default-group')
+    } else if (groupBehavior === 'new_window') {
+      console.log('[SidebarPanel] 🪟 自动打开新窗口')
+      await executeQuickConnect('new-window')
+    } else {
+      console.log('[SidebarPanel] ✅ 显示选择对话框')
+      showConnDialog.value = true
+    }
   }
 }
 
@@ -432,7 +447,14 @@ const executeQuickConnect = async (type) => {
     messageRef.value?.success(`已连接 ${config.name}`)
 
     // 打开 SSH 窗口
-    await OpenSSHWindow(result.groupID, config.name, result.connID)
+    await OpenSSHWindow(result.groupID || '', config.name || '', result.connID || '')
+
+    // 如果开启了自动托盘，连接成功后隐藏主窗口
+    const cfgStore = useConfigStore()
+    await cfgStore.init()
+    if (cfgStore.get('ui', 'autoTray')) {
+      Events.Emit('ssh:tray-hide')
+    }
   } catch (e) {
     messageRef.value?.error(`连接失败: ${e?.message || e}`)
   } finally {
@@ -529,10 +551,19 @@ const handleClickOutside = (event) => {
 // 监听后端广播的连接状态更新
 const handleConnectionsUpdated = (event) => {
   const { connections, timestamp } = event.data || {}
-  
+  console.log('[SidebarPanel] 📡 收到 ssh:connections-updated 事件:', {
+    timestamp,
+    connectionsCount: connections?.length,
+    hasConnections: !!connections,
+    isArray: Array.isArray(connections)
+  })
+
   if (connections && Array.isArray(connections)) {
     // 直接更新 store 中的数据（store内部会检测变化）
+    console.log('[SidebarPanel] 📤 调用 updateConnections，连接数:', connections.length)
     connectionsStore.updateConnections(connections)
+  } else {
+    console.log('[SidebarPanel] ⚠️ 事件数据无效，跳过更新')
   }
 }
 
@@ -596,7 +627,7 @@ const openSettings = () => {
   border-radius: 0.5rem;
   padding: 0.25rem;
   min-width: 10rem;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 0.5rem 1.5rem var(--bg-overlay);
   z-index: 100000;
 }
 
@@ -636,8 +667,16 @@ const openSettings = () => {
 
 .custom-menu .menu-sep {
   height: 1px;
-  background: var(--border-subtle);
+  background: var(--surface-3);
   margin: 0.25rem 0.5rem;
+}
+
+.icon-success {
+  color: var(--success-light, #68d391);
+}
+
+.icon-muted {
+  color: var(--text-muted, #718096);
 }
 
 /* 编辑连接弹窗 */
@@ -648,9 +687,9 @@ const openSettings = () => {
   z-index: 10000; backdrop-filter: blur(4px);
 }
 .edit-modal {
-  background: var(--bg-panel); border: 1px solid var(--border-default);
+  background: var(--bg-panel); border: 1px solid var(--surface-hover);
   border-radius: 0.75rem; width: 380px; max-width: 90vw;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 16px 48px var(--shadow-lg, rgba(0, 0, 0, 0.5));
 }
 .edit-modal-head {
   display: flex; justify-content: space-between; align-items: center;
@@ -666,26 +705,26 @@ const openSettings = () => {
 }
 .edit-field label { display: block; color: var(--text-secondary); font-size: 0.75rem; margin-bottom: 0.25rem; }
 .edit-input {
-  width: 100%; background: var(--bg-input);
-  border: 1px solid var(--border-default); border-radius: 0.375rem;
+  width: 100%; background: var(--bg-panel);
+  border: 1px solid var(--surface-hover); border-radius: 0.375rem;
   color: var(--text-primary); font-size: 0.8125rem; padding: 0.5rem 0.75rem;
   outline: none; box-sizing: border-box;
 }
-.edit-input:focus { border-color: var(--border-accent); }
+.edit-input:focus { border-color: var(--border-accent, rgba(66, 153, 225, 0.4)); }
 .edit-error { color: var(--accent-danger); font-size: 0.75rem; }
 .edit-btn {
   display: inline-flex; align-items: center; gap: 0.375rem;
   padding: 0.5rem 1rem;
-  background: var(--surface-2);
-  border: 1px solid var(--border-default);
+  background: var(--border-subtle);
+  border: 1px solid var(--surface-3);
   border-radius: 0.375rem;
   color: var(--text-secondary); font-size: 0.8125rem;
   cursor: pointer; transition: all 0.15s;
 }
 .edit-btn:hover:not(:disabled) { background: var(--surface-hover); color: var(--text-primary); }
 .edit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.edit-btn-primary { background: var(--primary-bg); border-color: var(--border-accent); color: var(--primary-light); }
-.edit-btn-primary:hover:not(:disabled) { background: var(--primary-bg-hover); }
+.edit-btn-primary { background: var(--primary-bg, rgba(66, 153, 225, 0.2)); border-color: var(--border-accent, rgba(66, 153, 225, 0.4)); color: var(--primary-light); }
+.edit-btn-primary:hover:not(:disabled) { background: var(--primary-bg-hover, rgba(66, 153, 225, 0.35)); }
 </style>
 
 <style scoped>
@@ -721,9 +760,9 @@ const openSettings = () => {
 .search-input {
   width: 100%;
   padding: 0.5rem 0.625rem 0.5rem 2rem;
-  background: var(--surface-2);
+  background: var(--surface-3);
   backdrop-filter: blur(10px);
-  border: 0.0625rem solid var(--border-default);
+  border: 0.0625rem solid var(--border-strong);
   border-radius: 0.375rem;
   color: var(--text-primary);
   font-size: 0.8125rem;
@@ -738,7 +777,7 @@ const openSettings = () => {
 
 .search-input:focus {
   background: var(--surface-3);
-  border-color: var(--border-accent);
+  border-color: var(--border-accent, rgba(66, 153, 225, 0.5));
   box-shadow: 0 0 0 0.125rem var(--primary-bg);
 }
 
@@ -762,7 +801,7 @@ const openSettings = () => {
 .spinner {
   width: 1.5rem;
   height: 1.5rem;
-  border: 0.125rem solid var(--border-default);
+  border: 0.125rem solid var(--surface-hover);
   border-top-color: var(--accent-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -820,14 +859,6 @@ const openSettings = () => {
   user-select: none;
 }
 
-.section-header.saved-section {
-  color: var(--success-light);
-}
-
-.section-header.cached-section {
-  color: var(--text-muted);
-}
-
 .section-title {
   color: var(--text-muted);
   font-size: 0.6875rem;
@@ -854,20 +885,20 @@ const openSettings = () => {
   padding: 0.625rem;
   background: var(--surface-1);
   backdrop-filter: blur(10px);
-  border: 0.0625rem solid var(--border-subtle);
+  border: 0.0625rem solid var(--border-default);
   border-radius: 0.375rem;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .connection-item:hover {
-  background: var(--surface-hover);
-  border-color: var(--border-default);
+  background: var(--surface-3);
+  border-color: var(--border-strong);
 }
 
 .connection-item.active {
-  background: var(--bg-selected);
-  border-color: var(--border-accent);
+  background: var(--primary-bg, rgba(66, 153, 225, 0.12));
+  border-color: var(--primary-bg-hover, rgba(66, 153, 225, 0.3));
 }
 
 .connection-item.connected {
@@ -935,15 +966,15 @@ const openSettings = () => {
 }
 
 .status-badge.connected {
-  background: var(--success-bg);
+  background: var(--success-bg, rgba(72, 187, 120, 0.15));
   color: var(--accent-success);
-  border: 0.0625rem solid color-mix(in srgb, var(--accent-success), transparent 70%);
+  border: 0.0625rem solid var(--border-success, rgba(72, 187, 120, 0.3));
 }
 
 .status-badge.disconnected {
-  background: var(--surface-1);
+  background: var(--surface-2, rgba(160, 174, 192, 0.1));
   color: var(--text-secondary);
-  border: 0.0625rem solid var(--border-default);
+  border: 0.0625rem solid var(--surface-3, rgba(160, 174, 192, 0.2));
 }
 
 .connection-bottom {
@@ -972,14 +1003,14 @@ const openSettings = () => {
   gap: 0.375rem;
   flex-shrink: 0;
   padding-top: 0.625rem;
-  border-top: 0.0625rem solid var(--border-default);
+  border-top: 0.0625rem solid var(--surface-hover);
 }
 
 .icon-btn {
   flex: 1;
   padding: 0.5rem;
-  background: var(--surface-2);
-  border: 0.0625rem solid var(--border-default);
+  background: var(--surface-1);
+  border: 0.0625rem solid var(--surface-hover);
   border-radius: 0.375rem;
   color: var(--text-secondary);
   cursor: pointer;
@@ -991,7 +1022,7 @@ const openSettings = () => {
 
 .icon-btn:hover {
   background: var(--surface-hover);
-  border-color: var(--border-default);
+  border-color: var(--scrollbar-thumb);
   color: var(--text-primary);
 }
 
@@ -1005,7 +1036,7 @@ const openSettings = () => {
 }
 
 .connection-list::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
+  background: var(--border-strong);
   border-radius: 0.125rem;
 }
 

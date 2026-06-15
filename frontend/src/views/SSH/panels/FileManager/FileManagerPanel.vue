@@ -88,7 +88,6 @@
       :numeric-value="chmodValue"
       :apply-to-subdirs="applyToSubdirs"
       @confirm="handleChmodConfirm"
-      @set-preset="setPreset"
       @update:permission="handlePermissionUpdate"
       @update:apply-to-subdirs="applyToSubdirs = $event"
     />
@@ -983,12 +982,6 @@ const chmodFile = (file) => {
   showChmodDialog.value = true
 }
 
-// 设置预设权限
-const setPreset = (value) => {
-  chmodValue.value = value
-  parsePermissions(value)
-}
-
 // 从复选框状态计算数字权限
 const calculateNumericMode = () => {
   const calc = (perm) => {
@@ -1616,8 +1609,8 @@ const batchChmod = () => {
 
 .status-bar {
   padding: 0.5rem 1rem;
-  border-top: 1px solid var(--border-default);
-  background: var(--surface-1);
+  border-top: 1px solid var(--surface-hover);
+  background: var(--surface-2);
   color: var(--text-secondary);
   font-size: 0.75rem;
 }
@@ -1636,7 +1629,7 @@ const batchChmod = () => {
 .dialog-input {
   padding: 0.5rem 0.75rem;
   background: var(--bg-input);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--border-strong);
   border-radius: 0.375rem;
   color: var(--text-primary);
   font-size: 0.875rem;
@@ -1654,8 +1647,8 @@ const batchChmod = () => {
   right: 20px;
   width: 400px;
   max-height: 500px;
-  background: var(--bg-panel-solid);
-  border: 1px solid var(--border-default);
+  background: var(--bg-tooltip);
+  border: 1px solid var(--surface-hover);
   border-radius: 8px;
   box-shadow: var(--shadow-md);
   display: flex;
@@ -1665,7 +1658,7 @@ const batchChmod = () => {
 
 .upload-panel-header {
   padding: 1rem;
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--surface-hover);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1707,7 +1700,7 @@ const batchChmod = () => {
 
 .upload-task {
   padding: 0.75rem;
-  background: var(--surface-1);
+  background: var(--surface-2);
   border-radius: 6px;
   margin-bottom: 0.5rem;
 }
@@ -1744,7 +1737,7 @@ const batchChmod = () => {
 .progress-bar {
   flex: 1;
   height: 6px;
-  background: var(--surface-2);
+  background: var(--surface-hover);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -1767,7 +1760,7 @@ const batchChmod = () => {
 }
 
 .progress-fill.failed {
-  background: var(--accent-danger);
+  background: var(--danger-light);
 }
 
 .progress-fill.cancelled {
@@ -1808,7 +1801,7 @@ const batchChmod = () => {
 }
 
 .status-failed {
-  color: var(--accent-danger);
+  color: var(--danger-light);
 }
 
 .status-cancelled {
@@ -1824,7 +1817,7 @@ const batchChmod = () => {
 .btn-retry {
   padding: 0.25rem 0.5rem;
   background: transparent;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--scrollbar-thumb);
   border-radius: 4px;
   color: var(--text-primary);
   font-size: 0.75rem;
@@ -1834,7 +1827,7 @@ const batchChmod = () => {
 
 .btn-cancel:hover {
   background: var(--danger-bg);
-  border-color: var(--accent-danger);
+  border-color: var(--danger-light);
 }
 
 .btn-retry:hover {

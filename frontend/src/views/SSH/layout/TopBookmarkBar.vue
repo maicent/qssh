@@ -89,16 +89,21 @@ import { Window, Events } from '@wailsio/runtime'
 import { useSSHTabsStore } from '../../../stores/sshTabs'
 import { useSSHConnectionsStore } from '../../../stores/sshConnections'
 import { useSSHLayoutStore } from '../../../stores/sshLayout'
+import { useConfigStore } from '../../../stores/config'
+import * as CloudService from '../../../../bindings/changeme/ssh/cloudservice.js'
+import * as SSHService from '../../../../bindings/changeme/ssh/sshservice.js'
 import { storeToRefs } from 'pinia'
 import Modal from '../../../components/Modal.vue'
 import { Disconnect } from "../../../../bindings/changeme/ssh/sshservice.js"
 import { listenToGroupUpdates } from '../../../utils/sshEvents'
+import { showMessage } from '../../../utils/message'
 
 const route = useRoute()
 const router = useRouter()
 const tabsStore = useSSHTabsStore()
 const connectionsStore = useSSHConnectionsStore()
 const sshLayoutStore = useSSHLayoutStore()
+const configStore = useConfigStore()
 const { tabs, activeTabId } = storeToRefs(tabsStore)
 
 // 从路由参数获取 groupID
@@ -240,9 +245,161 @@ const handleDragStart = (event, tab) => {
   event.dataTransfer.effectAllowed = 'move'
 }
 
+// 快捷键处理
+function handleKeyboard(e) {
+  const shortcutsEnabled = configStore.get('shortcuts', 'enabled')
+  if (!shortcutsEnabled) return
+
+  // Ctrl+←/→ 切换标签
+  if (e.ctrlKey && !e.shiftKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+    if (!configStore.get('shortcuts', 'switchTab')) return
+    const tabList = tabs.value
+    if (tabList.length < 2) return
+
+    const currentIndex = tabList.findIndex(t => t.id === activeTabId.value)
+    if (currentIndex === -1) return
+
+    let newIndex
+    if (e.key === 'ArrowLeft') {
+      newIndex = currentIndex > 0 ? currentIndex - 1 : tabList.length - 1
+    } else {
+      newIndex = currentIndex < tabList.length - 1 ? currentIndex + 1 : 0
+    }
+
+    const newTab = tabList[newIndex]
+    console.log('[Shortcuts] 切换标签:', newTab.name)
+    openConnection(newTab.id)
+    e.preventDefault()
+    return
+  }
+
+  // Ctrl+Shift+S 保存当前分组
+  if (e.ctrlKey && e.shiftKey && e.key === 'S') {
+    if (!configStore.get('shortcuts', 'saveGroup')) return
+    console.log('[Shortcuts] 保存当前分组')
+    saveCurrentGroup()
+    e.preventDefault()
+    return
+  }
+
+  // Ctrl+Shift+U 上传到云端
+  if (e.ctrlKey && e.shiftKey && e.key === 'U') {
+    if (!configStore.get('shortcuts', 'cloudUpload')) return
+    console.log('[Shortcuts] 上传到云端')
+    cloudUpload()
+    e.preventDefault()
+    return
+  }
+
+  // Ctrl+Shift+D 从云端下载
+  if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+    if (!configStore.get('shortcuts', 'cloudDownload')) return
+    console.log('[Shortcuts] 从云端下载')
+    cloudDownload()
+    e.preventDefault()
+    return
+  }
+}
+
+// 保存当前选中的连接
+async function saveCurrentGroup() {
+  try {
+    if (!activeTabId.value) {
+      showMessage('没有选中的连接', 'warning')
+      return
+    }
+    await SSHService.SaveConnection(activeTabId.value)
+    showMessage('连接已保存', 'success')
+  } catch (e) {
+    console.error('[Shortcuts] 保存失败:', e)
+    showMessage('保存失败: ' + (e?.message || e), 'error')
+  }
+}
+
+// 上传到云端
+async function cloudUpload() {
+  try {
+    const connected = await CloudService.IsConnected()
+    if (!connected) {
+      showMessage('未连接云端', 'warning')
+      return
+    }
+
+    let cloudConns = []
+    try {
+      cloudConns = await CloudService.PullSync() || []
+    } catch {}
+
+    const localConns = await SSHService.GetAllConnections() || []
+    const now = new Date().toISOString()
+
+    const merged = new Map()
+    for (const c of cloudConns) {
+      const key = `${c.host}:${c.port}`
+      merged.set(key, c)
+    }
+    for (const c of localConns) {
+      const key = `${c.host}:${c.port}`
+      merged.set(key, {
+        id: c.id, name: c.name, host: c.host, port: c.port || 22,
+        username: c.username, password: c.password || '', keyPath: c.keyPath || '',
+        source: 'local', updatedAt: now,
+      })
+    }
+
+    await CloudService.PushSync(Array.from(merged.values()))
+    showMessage(`上传成功，共 ${merged.size} 个连接`, 'success')
+  } catch (e) {
+    console.error('[Shortcuts] 上传失败:', e)
+    showMessage('上传失败: ' + (e?.message || e), 'error')
+  }
+}
+
+// 从云端下载
+async function cloudDownload() {
+  try {
+    const connected = await CloudService.IsConnected()
+    if (!connected) {
+      showMessage('未连接云端', 'warning')
+      return
+    }
+
+    const conns = await CloudService.PullSync()
+    if (!conns || conns.length === 0) {
+      showMessage('云端无连接配置', 'info')
+      return
+    }
+
+    let count = 0
+    for (const c of conns) {
+      try {
+        await SSHService.SyncImportConnection({
+          name: c.name || `${c.username}@${c.host}`,
+          host: c.host,
+          port: c.port || 22,
+          username: c.username,
+          password: c.password || '',
+          keyPath: c.keyPath || '',
+        })
+        count++
+      } catch (e) {
+        console.warn('[Shortcuts] 同步导入失败:', c.name, e.message)
+      }
+    }
+    showMessage(`下载完成，处理了 ${count} 个连接`, 'success')
+  } catch (e) {
+    console.error('[Shortcuts] 下载失败:', e)
+    showMessage('下载失败: ' + (e?.message || e), 'error')
+  }
+}
+
 onMounted(() => {
   updateMaximiseButton()
   setInterval(updateMaximiseButton, 500)
+
+  // 注册快捷键监听
+  document.addEventListener('keydown', handleKeyboard)
+  console.log('[Shortcuts] ✓ 键盘监听已注册')
 
   // 监听 tabs 变化，如果全部关闭则自动关闭窗口
   watch(tabs, (newTabs) => {
@@ -328,6 +485,9 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  // 清理快捷键监听
+  document.removeEventListener('keydown', handleKeyboard)
+
   // 清理事件监听器
   if (cleanupGroupListener) {
     cleanupGroupListener()
@@ -344,8 +504,8 @@ onUnmounted(() => {
 <style scoped>
 .top-bar {
   height: 2.5rem;
-  background: var(--bg-toolbar);
-  border-bottom: 0.0625rem solid var(--border-default);
+  background: var(--toolbar-1);
+  border-bottom: 0.0625rem solid var(--surface-hover);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -367,7 +527,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.375rem 0.75rem;
-  background: var(--surface-2);
+  background: var(--toolbar-2);
   border: 0.0625rem solid transparent;
   border-bottom: 2px solid transparent;
   border-radius: 0.25rem 0.25rem 0 0;
@@ -391,8 +551,8 @@ onUnmounted(() => {
 }
 
 .tab-item.active {
-  background: var(--bg-panel);
-  border-color: var(--border-default);
+  background: var(--toolbar-4);
+  border-color: var(--surface-hover);
   border-bottom-color: var(--accent-primary);
 }
 
@@ -405,17 +565,17 @@ onUnmounted(() => {
 
 .tab-status.connected {
   background: var(--accent-success);
-  box-shadow: 0 0 0.375rem color-mix(in srgb, var(--accent-success), transparent 50%);
+  box-shadow: 0 0 0.375rem var(--success-bg);
 }
 
 .tab-status.disconnected {
   background: var(--accent-danger);
-  box-shadow: 0 0 0.375rem color-mix(in srgb, var(--accent-danger), transparent 50%);
+  box-shadow: 0 0 0.375rem var(--danger-bg);
 }
 
 .tab-status.reconnecting {
   background: var(--accent-warning);
-  box-shadow: 0 0 0.375rem color-mix(in srgb, var(--accent-warning), transparent 50%);
+  box-shadow: 0 0 0.375rem var(--warning-bg);
   animation: pulse 1.5s infinite;
 }
 
@@ -478,7 +638,7 @@ onUnmounted(() => {
 }
 
 .tab-close:hover {
-  background: var(--surface-hover);
+  background: var(--border-strong);
   color: var(--accent-danger);
 }
 
@@ -489,7 +649,7 @@ onUnmounted(() => {
   gap: 0.25rem;
   margin-left: 0.5rem;
   padding-left: 0.5rem;
-  border-left: 0.0625rem solid var(--border-default);
+  border-left: 0.0625rem solid var(--surface-hover);
 }
 
 .control-btn {
@@ -512,7 +672,7 @@ onUnmounted(() => {
 }
 
 .control-btn.close:hover {
-  background: var(--danger-bg);
+  background: rgba(229, 62, 62, 0.2);
   color: var(--accent-danger);
 }
 
@@ -531,6 +691,6 @@ onUnmounted(() => {
 }
 
 .tab-container::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover);
+  background: rgba(255, 255, 255, 0.3);
 }
 </style>

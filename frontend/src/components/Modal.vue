@@ -128,15 +128,15 @@ const props = defineProps({
   },
   overlayColor: {
     type: String,
-    default: 'var(--bg-overlay)'
+    default: ''
   },
   backgroundColor: {
     type: String,
-    default: 'var(--bg-panel)'
+    default: ''
   },
   borderColor: {
     type: String,
-    default: 'var(--border-strong)'
+    default: ''
   },
   
   // ========== 显示控制 ==========
@@ -265,8 +265,8 @@ const computedStyle = computed(() => ({
   minWidth: typeof props.minWidth === 'number' ? `${props.minWidth}px` : props.minWidth,
   minHeight: typeof props.minHeight === 'number' ? `${props.minHeight}px` : props.minHeight,
   borderRadius: typeof props.borderRadius === 'number' ? `${props.borderRadius}px` : props.borderRadius,
-  backgroundColor: props.backgroundColor,
-  borderColor: props.borderColor
+  ...(props.backgroundColor ? { backgroundColor: props.backgroundColor } : {}),
+  ...(props.borderColor ? { borderColor: props.borderColor } : {})
 }))
 
 // 计算内容区内边距
@@ -275,9 +275,7 @@ const bodyPaddingValue = computed(() => {
 })
 
 const overlayStyle = computed(() => ({
-  backgroundColor: props.overlayColor.startsWith('var(')
-    ? props.overlayColor
-    : props.overlayColor.replace(/\d+\.\d+\)$/, `${props.overlayOpacity})`),
+  ...(props.overlayColor ? { backgroundColor: props.overlayColor.replace(/\d+\.\d+\)$/, `${props.overlayOpacity})`) } : {}),
   backdropFilter: `blur(${props.overlayBlur}px)`
 }))
 
@@ -341,6 +339,8 @@ watch(() => props.visible, (newVal) => {
   align-items: center;
   justify-content: center;
   z-index: 9999;
+  background-color: var(--bg-overlay);
+  backdrop-filter: blur(4px);
 }
 
 /* ========== 容器 ========== */
@@ -348,8 +348,9 @@ watch(() => props.visible, (newVal) => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid v-bind('props.borderColor');
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 20px 60px var(--shadow-lg);
   animation: modalSlideIn v-bind('props.animationDuration + "ms"') ease-out;
 }
 
@@ -370,7 +371,7 @@ watch(() => props.visible, (newVal) => {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--surface-hover);
   flex-shrink: 0;
 }
 
@@ -414,7 +415,7 @@ watch(() => props.visible, (newVal) => {
 /* ========== 底部按钮区 ========== */
 .modal-footer {
   padding: 1rem 1.5rem;
-  border-top: 1px solid var(--border-default);
+  border-top: 1px solid var(--surface-hover);
   flex-shrink: 0;
 }
 
@@ -452,21 +453,21 @@ watch(() => props.visible, (newVal) => {
 }
 
 .btn-cancel {
-  background: var(--surface-2);
+  background: var(--surface-hover);
   color: var(--text-primary);
 }
 
 .btn-cancel:hover {
-  background: var(--surface-hover);
+  background: var(--border-strong);
 }
 
 .btn-confirm {
   background: var(--accent-primary);
-  color: var(--text-on-accent);
+  color: white;
 }
 
 .btn-confirm:hover {
-  background: var(--primary-light);
+  background: var(--accent-primary);
 }
 
 .btn-confirm:disabled {

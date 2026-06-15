@@ -66,7 +66,7 @@ const isActive = (panelType) => {
 <style scoped>
 .left-sidebar {
   width: 3rem;
-  background: var(--bg-sidebar);
+  background: var(--toolbar-1);
   border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
@@ -97,13 +97,13 @@ const isActive = (panelType) => {
 }
 
 .tool-btn:hover {
-  background: var(--surface-hover);
+  background: var(--border-subtle);
   color: var(--text-secondary);
 }
 
 .tool-btn.active {
   color: var(--primary-light);
-  background: var(--primary-bg);
+  background: rgba(66, 153, 225, 0.12);
 }
 
 .tool-btn.active::before {

@@ -5,30 +5,41 @@
 <script setup>
 import { onMounted, onUnmounted } from 'vue'
 
-const TYPE_CONFIG = {
-  success: {
-    color: 'var(--accent-success)',
-    borderColor: 'var(--border-default)',
-    iconBg: 'var(--success-bg)',
-    icon: '<polyline points="20 6 9 17 4 12"/>'
-  },
-  error: {
-    color: 'var(--accent-danger)',
-    borderColor: 'var(--border-default)',
-    iconBg: 'var(--danger-bg)',
-    icon: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'
-  },
-  warning: {
-    color: 'var(--accent-warning)',
-    borderColor: 'var(--border-default)',
-    iconBg: 'var(--warning-bg)',
-    icon: '<path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>'
-  },
-  info: {
-    color: 'var(--accent-primary)',
-    borderColor: 'var(--border-default)',
-    iconBg: 'var(--primary-bg)',
-    icon: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>'
+// 读取 CSS 变量
+function getCSSVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+}
+
+function getTypeConfig() {
+  return {
+    success: {
+      color: getCSSVar('--accent-success') || '#68d391',
+      borderColor: getCSSVar('--border-success') || 'rgba(72, 187, 120, 0.4)',
+      bgGrad: `linear-gradient(135deg, ${getCSSVar('--success-bg') || 'rgba(72,187,120,0.08)'}, ${getCSSVar('--bg-panel') || 'rgba(30,30,30,0.65)'})`,
+      iconBg: getCSSVar('--success-bg') || 'rgba(72, 187, 120, 0.15)',
+      icon: '<polyline points="20 6 9 17 4 12"/>'
+    },
+    error: {
+      color: getCSSVar('--accent-danger') || '#fc8181',
+      borderColor: getCSSVar('--border-danger') || 'rgba(245, 101, 101, 0.4)',
+      bgGrad: `linear-gradient(135deg, ${getCSSVar('--danger-bg') || 'rgba(245,101,101,0.08)'}, ${getCSSVar('--bg-panel') || 'rgba(30,30,30,0.65)'})`,
+      iconBg: getCSSVar('--danger-bg') || 'rgba(245, 101, 101, 0.15)',
+      icon: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'
+    },
+    warning: {
+      color: getCSSVar('--accent-warning') || '#fbd38d',
+      borderColor: getCSSVar('--border-warning') || 'rgba(237, 137, 54, 0.4)',
+      bgGrad: `linear-gradient(135deg, ${getCSSVar('--warning-bg') || 'rgba(237,137,54,0.08)'}, ${getCSSVar('--bg-panel') || 'rgba(30,30,30,0.65)'})`,
+      iconBg: getCSSVar('--warning-bg') || 'rgba(237, 137, 54, 0.15)',
+      icon: '<path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>'
+    },
+    info: {
+      color: getCSSVar('--accent-info') || '#90cdf4',
+      borderColor: getCSSVar('--border-accent') || 'rgba(66, 153, 225, 0.4)',
+      bgGrad: `linear-gradient(135deg, ${getCSSVar('--primary-bg') || 'rgba(66,153,225,0.08)'}, ${getCSSVar('--bg-panel') || 'rgba(30,30,30,0.65)'})`,
+      iconBg: getCSSVar('--primary-bg') || 'rgba(66, 153, 225, 0.15)',
+      icon: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>'
+    }
   }
 }
 
@@ -53,27 +64,10 @@ function ensureContainer() {
   document.body.appendChild(container)
 }
 
-function getThemeVars() {
-  const root = getComputedStyle(document.documentElement)
-  const isLight = document.documentElement.dataset.theme === 'light'
-  return {
-    isLight,
-    accentSuccess: root.getPropertyValue('--accent-success').trim() || '#48bb78',
-    accentDanger: root.getPropertyValue('--accent-danger').trim() || '#fc8181',
-    accentWarning: root.getPropertyValue('--accent-warning').trim() || '#fbd38d',
-    accentInfo: root.getPropertyValue('--accent-primary').trim() || '#4299e1',
-    textPrimary: root.getPropertyValue('--text-primary').trim() || '#e2e8f0',
-    bgPanel: root.getPropertyValue('--bg-panel').trim() || 'rgba(45,45,45,0.95)',
-    borderDefault: root.getPropertyValue('--border-default').trim() || 'rgba(255,255,255,0.1)',
-    shadowMd: root.getPropertyValue('--shadow-md').trim() || '0 8px 32px rgba(0,0,0,0.4)',
-    surface2: root.getPropertyValue('--surface-2').trim() || 'rgba(255,255,255,0.05)'
-  }
-}
-
 function showMessage(content, type = 'info', duration = 3000) {
   ensureContainer()
-  const vars = getThemeVars()
-  const cfg = TYPE_CONFIG[type] || TYPE_CONFIG.info
+  const typeConfig = getTypeConfig()
+  const cfg = typeConfig[type] || typeConfig.info
   const id = ++idCounter
 
   const el = document.createElement('div')
@@ -84,29 +78,34 @@ function showMessage(content, type = 'info', duration = 3000) {
     alignItems: 'center',
     gap: '0.625rem',
     padding: '0.75rem 1rem',
-    background: vars.bgPanel,
+    background: cfg.bgGrad,
     backdropFilter: 'blur(16px) saturate(1.4)',
     border: `1px solid ${cfg.borderColor}`,
     borderRadius: '0.625rem',
-    boxShadow: vars.shadowMd,
+    boxShadow: `0 0.25rem 0.75rem ${getCSSVar('--shadow-sm') || 'rgba(0,0,0,0.3)'}, inset 0 1px 0 ${getCSSVar('--surface-1') || 'rgba(255,255,255,0.04)'}`,
     animation: '__msg_slideIn__ 0.25s cubic-bezier(0.16,1,0.3,1)',
     transition: 'opacity 0.2s, transform 0.2s',
     fontFamily: 'inherit'
   })
 
+  const textColor = getCSSVar('--text-primary') || '#e2e8f0'
+  const closeColor = getCSSVar('--text-muted') || 'rgba(255,255,255,0.3)'
+  const closeHoverColor = getCSSVar('--text-primary') || 'rgba(255,255,255,0.7)'
+  const closeHoverBg = getCSSVar('--surface-hover') || 'rgba(255,255,255,0.08)'
+
   el.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:50%;flex-shrink:0;color:${cfg.color};background:${cfg.iconBg}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${cfg.icon}</svg>
     </div>
-    <span style="color:${vars.textPrimary};font-size:0.8125rem;flex:1;line-height:1.5">${content}</span>
-    <button style="display:flex;align-items:center;justify-content:center;width:1.375rem;height:1.375rem;background:transparent;border:none;border-radius:0.25rem;color:var(--text-muted);cursor:pointer;flex-shrink:0;transition:all 0.15s">
+    <span style="color:${textColor};font-size:0.8125rem;flex:1;line-height:1.5">${content}</span>
+    <button style="display:flex;align-items:center;justify-content:center;width:1.375rem;height:1.375rem;background:transparent;border:none;border-radius:0.25rem;color:${closeColor};cursor:pointer;flex-shrink:0;transition:all 0.15s">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
     </button>
   `
 
   const closeBtn = el.querySelector('button')
-  closeBtn.onmouseenter = () => { closeBtn.style.color = vars.textPrimary; closeBtn.style.background = vars.surface2 }
-  closeBtn.onmouseleave = () => { closeBtn.style.color = ''; closeBtn.style.background = 'transparent' }
+  closeBtn.onmouseenter = () => { closeBtn.style.color = closeHoverColor; closeBtn.style.background = closeHoverBg }
+  closeBtn.onmouseleave = () => { closeBtn.style.color = closeColor; closeBtn.style.background = 'transparent' }
   closeBtn.onclick = () => removeEl(el)
 
   container.appendChild(el)

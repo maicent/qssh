@@ -3,7 +3,7 @@
     <!-- 顶部工具栏 -->
     <div class="logs-toolbar">
       <div class="toolbar-left">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <svg class="icon-primary" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <h3>操作日志</h3>
         <span class="connection-badge" v-if="currentConnId">
           {{ getConnectionName() }}
@@ -77,7 +77,7 @@
     <!-- 日志列表容器 -->
     <div class="logs-container" ref="logsContainer">
       <div v-if="filteredLogs.length === 0" class="empty-state">
-        <svg class="empty-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <svg class="empty-icon icon-muted" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <p v-if="searchKeyword || filterType !== 'all' || filterLevel !== 'all'">
           没有找到匹配的日志
         </p>
@@ -387,21 +387,17 @@ onUnmounted(() => {
 /* 工具栏 */
 .logs-toolbar {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--surface-hover);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--bg-toolbar);
+  background: var(--toolbar-3);
 }
 
 .toolbar-left {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-}
-
-.toolbar-left svg {
-  color: var(--primary-light);
 }
 
 .toolbar-left h3 {
@@ -432,7 +428,7 @@ onUnmounted(() => {
   width: 1.75rem;
   height: 1.75rem;
   background: transparent;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--scrollbar-thumb);
   border-radius: 0.25rem;
   color: var(--text-secondary);
   cursor: pointer;
@@ -440,26 +436,26 @@ onUnmounted(() => {
 }
 
 .tool-btn:hover {
-  background: var(--bg-hover);
-  border-color: var(--border-strong);
+  background: var(--surface-hover);
+  border-color: var(--scrollbar-thumb-hover);
   color: var(--text-primary);
 }
 
 .tool-btn.active {
-  background: var(--primary-bg);
-  border-color: var(--border-accent);
+  background: var(--primary-bg-hover);
+  border-color: var(--accent-primary);
   color: var(--primary-light);
 }
 
 /* 过滤栏 */
 .logs-filter-bar {
   padding: 0.5rem 1rem;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--surface-1);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  background: var(--bg-toolbar);
+  background: var(--toolbar-3);
 }
 
 .search-box {
@@ -479,8 +475,8 @@ onUnmounted(() => {
 .search-input {
   width: 100%;
   padding: 0.375rem 0.625rem 0.375rem 2rem;
-  background: var(--bg-input);
-  border: 1px solid var(--border-default);
+  background: var(--toolbar-4);
+  border: 1px solid var(--surface-hover);
   border-radius: 0.375rem;
   color: var(--text-primary);
   font-size: 0.75rem;
@@ -490,7 +486,7 @@ onUnmounted(() => {
 
 .search-input:focus {
   border-color: var(--border-accent);
-  background: var(--bg-input-focus);
+  background: var(--toolbar-4);
   box-shadow: 0 0 0 2px var(--primary-bg);
 }
 
@@ -506,8 +502,8 @@ onUnmounted(() => {
 .filter-select {
   min-width: 110px;
   padding: 0.375rem 0.625rem;
-  background: var(--bg-input);
-  border: 1px solid var(--border-default);
+  background: var(--toolbar-4);
+  border: 1px solid var(--surface-hover);
   border-radius: 0.375rem;
   color: var(--text-primary);
   font-size: 0.75rem;
@@ -517,7 +513,7 @@ onUnmounted(() => {
 }
 
 .filter-select:hover {
-  border-color: var(--border-strong);
+  border-color: var(--scrollbar-thumb);
 }
 
 .filter-select:focus {
@@ -562,7 +558,6 @@ onUnmounted(() => {
 
 .empty-icon {
   opacity: 0.4;
-  color: var(--text-muted);
 }
 
 .empty-state p {
@@ -594,14 +589,14 @@ onUnmounted(() => {
 
 .log-card {
   padding: 0.75rem 1rem;
-  background: var(--surface-1);
+  background: var(--toolbar-3);
   border-radius: 0.375rem;
   transition: all 0.2s ease;
   cursor: pointer;
 }
 
 .log-card:hover {
-  background: var(--surface-hover);
+  background: var(--toolbar-2);
   transform: translateX(2px);
 }
 
@@ -642,7 +637,7 @@ onUnmounted(() => {
   color: var(--success-light);
 }
 .type-connection {
-  background: color-mix(in srgb, var(--accent-purple), transparent 80%);
+  background: var(--accent-purple-bg);
   color: var(--accent-purple);
 }
 .type-system {
@@ -651,14 +646,14 @@ onUnmounted(() => {
 }
 .type-error {
   background: var(--danger-bg);
-  color: var(--danger-light);
+  color: var(--accent-danger);
 }
 .type-security {
-  background: color-mix(in srgb, var(--accent-warning), transparent 80%);
-  color: var(--warning-light);
+  background: var(--warning-bg);
+  color: var(--accent-warning);
 }
 .type-ai {
-  background: color-mix(in srgb, var(--accent-purple), transparent 80%);
+  background: var(--accent-purple-bg);
   color: var(--accent-purple);
 }
 .type-portForward {
@@ -670,7 +665,7 @@ onUnmounted(() => {
   color: var(--warning-light);
 }
 .type-guardian {
-  background: color-mix(in srgb, var(--accent-purple), transparent 80%);
+  background: var(--accent-purple-bg);
   color: var(--accent-purple);
 }
 
@@ -691,28 +686,28 @@ onUnmounted(() => {
   color: var(--success-light);
 }
 .badge-warning {
-  background: color-mix(in srgb, var(--accent-warning), transparent 80%);
-  color: var(--warning-light);
+  background: var(--warning-bg);
+  color: var(--accent-warning);
 }
 .badge-error {
   background: var(--danger-bg);
-  color: var(--danger-light);
+  color: var(--accent-danger);
 }
 .badge-low {
-  background: color-mix(in srgb, var(--accent-warning), transparent 80%);
-  color: var(--warning-light);
+  background: var(--warning-bg);
+  color: var(--accent-warning);
 }
 .badge-medium {
-  background: color-mix(in srgb, var(--accent-warning), transparent 70%);
-  color: var(--warning-light);
+  background: var(--warning-bg);
+  color: var(--accent-warning);
 }
 .badge-high {
-  background: color-mix(in srgb, var(--accent-danger), transparent 75%);
+  background: var(--danger-bg);
   color: var(--danger-light);
   font-weight: 700;
 }
 .badge-critical {
-  background: color-mix(in srgb, var(--accent-danger), transparent 70%);
+  background: var(--danger-bg);
   color: var(--danger-light);
   font-weight: 700;
 }
@@ -750,7 +745,7 @@ onUnmounted(() => {
   padding: 0.5rem 0.75rem;
   background: var(--danger-bg);
   border-radius: 0.25rem;
-  border-left: 2px solid var(--accent-danger);
+  border-left: 2px solid var(--danger-light);
 }
 
 .security-warnings {
@@ -768,7 +763,7 @@ onUnmounted(() => {
 .log-details {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid var(--border-default);
+  border-top: 1px solid var(--surface-hover);
 }
 
 .details-label {
@@ -781,7 +776,7 @@ onUnmounted(() => {
 .details-content {
   font-size: 0.75rem;
   color: var(--text-secondary);
-  background: var(--surface-1);
+  background: var(--surface-3);
   padding: 0.625rem;
   border-radius: 0.25rem;
   overflow-x: auto;
@@ -794,8 +789,8 @@ onUnmounted(() => {
 /* 底部状态栏 */
 .logs-footer {
   padding: 0.5rem 1rem;
-  border-top: 1px solid var(--border-default);
-  background: var(--bg-toolbar);
+  border-top: 1px solid var(--surface-hover);
+  background: var(--toolbar-3);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -987,4 +982,12 @@ onUnmounted(() => {
     font-size: 0.75rem;
   }
 }
+
+.icon-primary { color: var(--primary-light); }
+.icon-muted { color: var(--text-muted); }
+.tag-info { background: var(--primary-bg); color: var(--primary-light); }
+.tag-success { background: var(--success-bg); color: var(--success-light); }
+.tag-warning { background: var(--warning-bg); color: var(--warning-light); }
+.tag-danger { background: var(--danger-bg); color: var(--accent-danger); }
+.tag-purple { background: var(--accent-purple-bg); color: var(--accent-purple); }
 </style>

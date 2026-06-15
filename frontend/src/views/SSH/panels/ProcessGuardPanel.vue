@@ -3,7 +3,7 @@
     <!-- 工具栏 -->
     <div class="pg-toolbar">
       <div class="pg-toolbar-left">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pg-icon-purple"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         <span class="pg-title">进程守护</span>
         <span v-if="processes.length" class="pg-badge">{{ processes.length }}</span>
       </div>
@@ -30,7 +30,7 @@
       </div>
 
       <div v-else-if="processes.length === 0" class="pg-empty">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="pg-icon-disabled"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         <p>暂无守护进程</p>
         <p class="pg-hint">创建守护进程可确保关键服务持续运行</p>
       </div>
@@ -303,24 +303,23 @@ onUnmounted(() => {
 .pg-toolbar {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border-default);
-  background: var(--surface-2);
+  border-bottom: 1px solid var(--surface-hover);
+  background: var(--toolbar-3);
   flex-shrink: 0;
 }
-.pg-toolbar-left { display: flex; align-items: center; gap: 0.5rem; color: var(--accent-purple); }
+.pg-toolbar-left { display: flex; align-items: center; gap: 0.5rem; }
 .pg-toolbar-right { display: flex; gap: 0.375rem; }
 .pg-title { color: var(--text-primary); font-weight: 600; font-size: 0.875rem; }
 .pg-badge {
   padding: 0.125rem 0.5rem; border-radius: 0.25rem;
   font-size: 0.625rem; font-weight: 600;
-  background: color-mix(in srgb, var(--accent-purple), transparent 80%);
-  color: var(--accent-purple);
+  background: var(--accent-purple-bg); color: var(--accent-purple);
 }
 
 .pg-btn {
   display: inline-flex; align-items: center; gap: 0.375rem;
   padding: 0.375rem 0.75rem;
-  background: var(--surface-1);
+  background: var(--border-subtle);
   border: 1px solid var(--border-default);
   border-radius: 0.375rem;
   color: var(--text-secondary); font-size: 0.75rem;
@@ -329,12 +328,12 @@ onUnmounted(() => {
 .pg-btn:hover:not(:disabled) { background: var(--surface-hover); color: var(--text-primary); }
 .pg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .pg-btn-sm { padding: 0.25rem 0.5rem; }
-.pg-btn-active { background: color-mix(in srgb, var(--accent-purple), transparent 80%); border-color: color-mix(in srgb, var(--accent-purple), transparent 60%); color: var(--accent-purple); }
-.pg-btn-primary { background: color-mix(in srgb, var(--accent-purple), transparent 80%); border-color: color-mix(in srgb, var(--accent-purple), transparent 60%); color: var(--accent-purple); }
-.pg-btn-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent-purple), transparent 65%); }
-.pg-btn-success { background: var(--success-bg); border-color: color-mix(in srgb, var(--accent-success), transparent 60%); color: var(--success-light); }
-.pg-btn-warn { background: var(--warning-bg); border-color: color-mix(in srgb, var(--warning-light), transparent 60%); color: var(--warning-light); }
-.pg-btn-danger { background: var(--danger-bg); border-color: color-mix(in srgb, var(--accent-danger), transparent 60%); color: var(--accent-danger); }
+.pg-btn-active { background: var(--accent-purple-bg); border-color: rgba(159, 122, 234, 0.4); color: var(--accent-purple); }
+.pg-btn-primary { background: var(--accent-purple-bg); border-color: rgba(159, 122, 234, 0.4); color: var(--accent-purple); }
+.pg-btn-primary:hover:not(:disabled) { background: var(--accent-purple-bg); }
+.pg-btn-success { background: var(--success-bg); border-color: var(--border-success); color: var(--success-light); }
+.pg-btn-warn { background: var(--warning-bg); border-color: var(--border-warning); color: var(--warning-light); }
+.pg-btn-danger { background: var(--danger-bg); border-color: var(--border-danger); color: var(--accent-danger); }
 
 .pg-content { flex: 1; overflow-y: auto; min-height: 0; }
 
@@ -343,12 +342,11 @@ onUnmounted(() => {
   height: 100%; gap: 0.75rem; color: var(--text-muted);
 }
 .pg-loading p, .pg-empty p { margin: 0; font-size: 0.875rem; }
-.pg-hint { font-size: 0.75rem !important; color: var(--text-muted) !important; }
+.pg-hint { font-size: 0.75rem !important; color: var(--text-disabled) !important; }
 
 .pg-spinner {
   width: 24px; height: 24px;
-  border: 2px solid color-mix(in srgb, var(--accent-purple), transparent 80%);
-  border-top-color: var(--accent-purple);
+  border: 2px solid var(--accent-purple-bg); border-top-color: var(--accent-purple);
   border-radius: 50%; animation: pg-spin 0.8s linear infinite;
 }
 @keyframes pg-spin { to { transform: rotate(360deg); } }
@@ -356,13 +354,13 @@ onUnmounted(() => {
 .pg-list { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
 
 .pg-card {
-  background: var(--surface-1);
+  background: var(--card-bg);
   border: 1px solid var(--border-subtle);
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
   transition: all 0.15s;
 }
-.pg-card:hover { background: var(--surface-2); }
+.pg-card:hover { background: var(--card-bg); }
 .pg-card.pg-status-running { border-left: 3px solid var(--success-light); }
 .pg-card.pg-status-stopped { border-left: 3px solid var(--text-muted); }
 .pg-card.pg-status-failed { border-left: 3px solid var(--accent-danger); }
@@ -402,14 +400,14 @@ onUnmounted(() => {
 .pg-footer {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0.25rem 1rem;
-  border-top: 1px solid var(--border-default);
-  background: var(--surface-2);
+  border-top: 1px solid var(--surface-hover);
+  background: var(--toolbar-3);
   font-size: 0.625rem; flex-shrink: 0;
 }
 .pg-footer-info { color: var(--text-muted); }
 .pg-auto-badge {
   padding: 0.0625rem 0.375rem;
-  background: color-mix(in srgb, var(--accent-purple), transparent 85%);
+  background: var(--accent-purple-bg);
   border-radius: 0.25rem;
   color: var(--accent-purple); font-size: 0.5625rem;
 }
@@ -422,7 +420,7 @@ onUnmounted(() => {
   z-index: 10000; backdrop-filter: blur(4px);
 }
 .pg-modal {
-  background: var(--bg-panel-solid); border: 1px solid var(--border-default);
+  background: var(--bg-panel-solid); border: 1px solid var(--surface-hover);
   border-radius: 0.75rem; width: 400px; max-width: 90vw;
   box-shadow: var(--shadow-lg);
 }
@@ -449,12 +447,12 @@ onUnmounted(() => {
 }
 .pg-field label { display: block; color: var(--text-secondary); font-size: 0.75rem; margin-bottom: 0.25rem; }
 .pg-input {
-  width: 100%; background: var(--bg-input);
-  border: 1px solid var(--border-default); border-radius: 0.375rem;
+  width: 100%; background: var(--bg-panel);
+  border: 1px solid var(--surface-hover); border-radius: 0.375rem;
   color: var(--text-primary); font-size: 0.8125rem; padding: 0.5rem 0.75rem;
   outline: none; box-sizing: border-box;
 }
-.pg-input:focus { border-color: color-mix(in srgb, var(--accent-purple), transparent 60%); }
+.pg-input:focus { border-color: var(--border-purple); }
 .pg-mono { font-family: 'Courier New', monospace; }
 .pg-checkbox-label {
   display: flex; align-items: center; gap: 0.5rem;
@@ -465,11 +463,15 @@ onUnmounted(() => {
 
 .pg-log-content {
   margin: 0; padding: 0.75rem;
-  background: var(--surface-1);
+  background: var(--surface-3);
   border-radius: 0.375rem;
   color: var(--text-secondary); font-size: 0.6875rem;
   font-family: 'Courier New', monospace;
   line-height: 1.5; white-space: pre-wrap;
   max-height: 50vh; overflow-y: auto;
 }
+
+/* SVG icon color classes */
+.pg-icon-purple { color: var(--accent-purple); }
+.pg-icon-disabled { color: var(--text-disabled); }
 </style>

@@ -209,8 +209,8 @@ defineEmits([
   align-items: center;
   gap: 1rem;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border-default);
-  background: var(--surface-1);
+  border-bottom: 1px solid var(--surface-hover);
+  background: var(--surface-2);
 }
 
 .toolbar-left,
@@ -225,8 +225,8 @@ defineEmits([
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--surface-2);
-  border: 1px solid var(--border-default);
+  background: var(--surface-hover);
+  border: 1px solid var(--border-strong);
   border-radius: 0.375rem;
   color: var(--text-primary);
   cursor: pointer;
@@ -234,7 +234,7 @@ defineEmits([
 }
 
 .tool-btn:hover:not(:disabled) {
-  background: var(--border-default);
+  background: var(--border-strong);
 }
 
 .tool-btn:disabled {
@@ -258,7 +258,7 @@ defineEmits([
   flex: 1;
   padding: 0.375rem 0.75rem;
   background: var(--bg-input);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--border-strong);
   border-radius: 0.375rem;
   color: var(--text-primary);
   font-size: 0.8125rem;
@@ -276,7 +276,7 @@ defineEmits([
   gap: 0.5rem;
   padding: 0.375rem 0.75rem;
   background: var(--bg-input);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--border-strong);
   border-radius: 0.375rem;
   min-width: 200px;
   max-width: 300px;
@@ -360,7 +360,7 @@ defineEmits([
 
 .batch-btn {
   background: var(--success-bg);
-  border-color: var(--accent-success);
+  border-color: var(--border-success);
   color: var(--success-light);
 }
 
@@ -405,12 +405,12 @@ defineEmits([
 }
 
 .toolbar.compact::-webkit-scrollbar-thumb {
-  background: linear-gradient(90deg, var(--primary-bg), var(--primary-bg-hover)) !important;
+  background: var(--scrollbar-thumb) !important;
   border-radius: 999px !important;
 }
 
 .toolbar.compact::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(90deg, var(--primary-bg-hover), var(--border-accent)) !important;
+  background: var(--scrollbar-thumb-hover) !important;
 }
 
 .toolbar.compact .toolbar-left,

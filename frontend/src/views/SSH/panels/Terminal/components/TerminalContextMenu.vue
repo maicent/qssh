@@ -13,7 +13,6 @@
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
           </svg>
           <span>复制</span>
-          <span class="shortcut">Ctrl+Shift+C</span>
         </div>
 
         <!-- 粘贴 -->
@@ -23,7 +22,6 @@
             <rect x="8" y="2" width="8" height="4" rx="1"/>
           </svg>
           <span>粘贴</span>
-          <span class="shortcut">Ctrl+Shift+V</span>
         </div>
 
         <div class="menu-separator"></div>
@@ -35,7 +33,6 @@
             <path d="M12 12H3M12 12V3"/>
           </svg>
           <span>全选</span>
-          <span class="shortcut">Ctrl+Shift+A</span>
         </div>
 
         <!-- 清屏 -->
@@ -56,36 +53,6 @@
             <line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
           <span>搜索</span>
-          <span class="shortcut">Ctrl+Shift+F</span>
-        </div>
-
-        <div class="menu-separator"></div>
-
-        <!-- 新建终端 -->
-        <div class="menu-item" @click="$emit('new-terminal')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          <span>新建终端</span>
-        </div>
-
-        <!-- 水平分屏 -->
-        <div class="menu-item" @click="$emit('split-horizontal')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2"/>
-            <line x1="3" y1="12" x2="21" y2="12"/>
-          </svg>
-          <span>水平分屏</span>
-        </div>
-
-        <!-- 垂直分屏 -->
-        <div class="menu-item" @click="$emit('split-vertical')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2"/>
-            <line x1="12" y1="3" x2="12" y2="21"/>
-          </svg>
-          <span>垂直分屏</span>
         </div>
       </div>
     </div>
@@ -105,10 +72,7 @@ const emit = defineEmits([
   'paste',
   'select-all',
   'clear',
-  'search',
-  'new-terminal',
-  'split-horizontal',
-  'split-vertical'
+  'search'
 ])
 
 function close() {
@@ -116,7 +80,7 @@ function close() {
 }
 </script>
 
-<style scoped>
+<style>
 .context-menu-mask {
   position: fixed;
   inset: 0;
@@ -125,12 +89,12 @@ function close() {
 
 .context-menu {
   position: fixed;
-  background: var(--bg-panel);
-  border: 1px solid var(--border-default);
+  background: var(--bg-panel-solid, #2d2d2d);
+  border: 1px solid var(--border-default, rgba(255, 255, 255, 0.1));
   border-radius: 8px;
   padding: 4px;
-  min-width: 200px;
-  box-shadow: var(--shadow-md);
+  min-width: 140px;
+  box-shadow: var(--shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.5));
   z-index: 10001;
   animation: contextMenuIn 0.1s ease-out;
 }
@@ -147,7 +111,7 @@ function close() {
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  color: var(--text-secondary);
+  color: var(--text-primary, #e2e8f0);
   font-size: 12px;
   border-radius: 4px;
   cursor: pointer;
@@ -155,8 +119,8 @@ function close() {
 }
 
 .menu-item:hover {
-  background: var(--primary-bg);
-  color: var(--text-primary);
+  background: var(--surface-hover, rgba(255, 255, 255, 0.1));
+  color: var(--text-primary, #e2e8f0);
 }
 
 .menu-item.disabled {
@@ -166,19 +130,11 @@ function close() {
 
 .menu-item.disabled:hover {
   background: transparent;
-  color: var(--text-secondary);
-}
-
-.shortcut {
-  margin-left: auto;
-  color: var(--text-muted);
-  font-size: 10px;
-  font-family: monospace;
 }
 
 .menu-separator {
   height: 1px;
-  background: var(--border-subtle);
+  background: var(--border-default, rgba(255, 255, 255, 0.1));
   margin: 4px 0;
 }
 </style>

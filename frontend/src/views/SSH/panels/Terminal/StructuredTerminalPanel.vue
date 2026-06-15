@@ -51,7 +51,7 @@
     </div>
 
     <!-- 块视图（读取 xterm 的输出缓冲） -->
-    <div v-show="view==='block'" class="view-block">
+    <div v-show="view==='block'" class="view-block" @contextmenu.prevent="onBlockContextMenu">
       <div class="bp" ref="blocksRef" @scroll="onBlocksScroll">
         <div v-if="bm.blocks.value.length===0" class="empty">输入命令开始</div>
         <TerminalBlock v-for="b in bm.blocks.value" :key="b.id" :block="b"
@@ -73,15 +73,36 @@
       <div class="inp" ref="inpAreaRef">
         <span class="ps">$</span>
         <div class="iw">
-          <input ref="inpRef" v-model="cmd" class="ci"
+          <input v-if="commandSendMode !== 'button'" ref="inpRef" v-model="cmd" class="ci"
             placeholder="输入命令" :disabled="status!=='active'"
             @keydown="onKey" @input="onInput" />
+          <textarea v-else ref="inpRef" v-model="cmd" class="ci ci-textarea"
+            placeholder="输入命令（Enter 换行，Ctrl+Enter 或点击发送）" :disabled="status!=='active'"
+            @keydown="onKeyButton" @input="onInputButton" rows="1"></textarea>
         </div>
+        <button v-if="commandSendMode === 'button'" class="send-btn" @click="exec" :disabled="!cmd.trim() || status !== 'active'" title="发送命令">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
       </div>
     </div>
 
     <!-- 经典视图（xterm，始终挂载） -->
-    <div v-show="view==='classic'" class="view-classic" ref="xtRef"></div>
+    <div v-show="view==='classic'" class="view-classic" ref="xtRef" @contextmenu.prevent="onClassicContextMenu"></div>
+
+    <!-- 右键菜单 -->
+    <TerminalContextMenu
+      v-model:visible="showContextMenu"
+      :position="contextMenuPos"
+      :has-selection="hasSelection"
+      @copy="ctxCopy"
+      @paste="ctxPaste"
+      @select-all="ctxSelectAll"
+      @clear="clearAll"
+      @search="openSearch"
+    />
 
     <!-- 搜索栏 -->
     <Transition name="slide-down">
@@ -188,8 +209,9 @@ import ConfirmSwitch from './components/ConfirmSwitch.vue'
 import InteractivePrompt from './components/InteractivePrompt.vue'
 import CommandHistoryDialog from './components/CommandHistoryDialog.vue'
 import ShortcutsDialog from './components/ShortcutsDialog.vue'
+import TerminalContextMenu from './components/TerminalContextMenu.vue'
 import { useRecording } from './composables/useRecording'
-import { getThemeForUI } from './utils/terminalThemes.js'
+import { highlightOutput } from './utils/highlightAddon'
 
 const props = defineProps({ params: { type: Object, default: () => ({}) } })
 const connId = inject('connId')
@@ -202,6 +224,12 @@ const ch = useCommandHistory(connId)
 const cfg = useConfigStore()
 const sm = getSessionManager()
 const completion = useCommandCompletion()
+
+// 命令发送模式：enter | button
+const commandSendMode = computed(() => cfg.get('terminal', 'commandSendMode') || 'enter')
+
+// 代码高亮（配置项）
+const highlightEnabled = computed(() => cfg.get('terminal', 'codeHighlight') || false)
 
 // 录制状态
 const isRecording = ref(false)
@@ -241,16 +269,20 @@ const pendingKey = ref('')
 const showMiniTerminal = ref(false)
 const miniInitialKey = ref('')
 
+// 右键菜单
+const showContextMenu = ref(false)
+const contextMenuPos = ref({ x: 0, y: 0 })
+
 // 视图模式：block=结构化, classic=经典
 const view = ref(cfg.getDefaultTerminalType() === 'classic' ? 'classic' : 'block')
 
 const statusLabel = computed(() => ({ idle:'空闲', starting:'连接中', active:'已连接', disconnected:'已断开', error:'错误' }[status.value]||''))
 const stats = computed(() => bm.getStats())
-
-// 同时监听 Pinia 配置和 DOM data-theme，确保跨窗口/跨方式都能同步
-const uiTheme = ref(cfg.config?.ui?.theme || document.documentElement.dataset.theme || 'dark')
-const terminalTheme = computed(() => getThemeForUI('default', uiTheme.value || 'dark'))
-let themeObserver = null
+const hasSelection = computed(() => {
+  if (view.value === 'classic' && xterm) return xterm.hasSelection()
+  const sel = window.getSelection()
+  return sel ? sel.toString().length > 0 : false
+})
 
 // xterm 实例（始终初始化，始终接收输出）
 let xterm = null
@@ -260,12 +292,6 @@ let xtermBuf = ''
 let yankBuf = ''
 let isUserScrolling = false
 let scrollTimer = null
-
-function applyTerminalTheme() {
-  if (!xterm) return
-  xterm.options.theme = { ...terminalTheme.value }
-  xterm.refresh(0, xterm.rows - 1)
-}
 
 // 滚动到底部
 function scrollToBottom() {
@@ -288,20 +314,17 @@ watch(() => bm.blocks.value.length, (newLen) => {
   }
 })
 
+// 右键菜单关闭后重新聚焦
+watch(showContextMenu, (val) => {
+  if (!val && view.value === 'classic') {
+    nextTick(() => xterm?.focus())
+  }
+})
+
 // 监听块内容变化（输出追加时）
 watch(() => bm.rawOutput.value, () => {
   scrollToBottom()
 })
-
-// UI 主题变化时同步更新终端主题
-watch(
-  () => terminalTheme.value,
-  () => {
-    console.log('[Terminal] 终端主题变更:', uiTheme.value, terminalTheme.value.background)
-    applyTerminalTheme()
-  },
-  { deep: false }
-)
 
 // 监听滚动位置
 function onBlocksScroll() {
@@ -324,8 +347,13 @@ function onOutput(event) {
   if (disposed) return
   const d = event?.data
   if (!d || d.sessionID !== sessionId) return
-  const text = typeof d === 'string' ? d : (d.data || '')
+  let text = typeof d === 'string' ? d : (d.data || '')
   if (!text) return
+
+  // 代码高亮（始终应用于 xterm 输出，切换到经典模式时自动生效）
+  if (highlightEnabled.value) {
+    text = highlightOutput(text)
+  }
 
   // 1. 写入 xterm（始终）
   if (xterm) xterm.write(text)
@@ -361,17 +389,6 @@ function onReconnected(e) {
 
 // ========== 初始化 ==========
 onMounted(async () => {
-  // 监听 html 的 data-theme 属性变化，作为 Pinia 之外的兜底同步手段
-  themeObserver = new MutationObserver((mutations) => {
-    for (const m of mutations) {
-      if (m.attributeName === 'data-theme') {
-        uiTheme.value = document.documentElement.dataset.theme || 'dark'
-        console.log('[Terminal] data-theme 变化:', uiTheme.value)
-      }
-    }
-  })
-  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
-
   sm.createSession(sessionId, connId, { type: isAI ? SESSION_TYPE.AI : SESSION_TYPE.NORMAL })
 
   // 始终初始化 xterm
@@ -405,6 +422,9 @@ onMounted(async () => {
   Events.On('ssh:connection-disconnected', onDisconnected)
   Events.On('ssh:connection-reconnected', onReconnected)
 
+  // 全局键盘监听（Ctrl+F 搜索）
+  document.addEventListener('keydown', onGlobalKey)
+
   // AI 通过终端执行命令时，创建块
   Events.On('ai:terminal-exec-start', (e) => {
     if (disposed) return
@@ -422,15 +442,60 @@ onUnmounted(() => {
   disposed = true
   // 不调用 Events.Off，避免误移除其他终端的监听器
   // handler 内部检查 disposed，不会处理已关闭终端的事件
+  document.removeEventListener('keydown', onGlobalKey)
   SSHService.CloseShellSessionByID(connId, sessionId).catch(() => {})
   resizeObs?.disconnect()
-  themeObserver?.disconnect()
   xterm?.dispose()
   sm.removeSession(sessionId)
   Events.Emit('terminal:session-closed', { connId, sessionId, isAI })
 })
 
 // ========== xterm 初始化（始终执行） ==========
+function getCSSVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+}
+
+function getXtermTheme() {
+  const isLight = document.documentElement.dataset.theme === 'light'
+
+  const base = {
+    background: getCSSVar('--bg-terminal') || '#121212',
+    foreground: getCSSVar('--text-primary') || '#d4d4d4',
+    cursor: getCSSVar('--text-primary') || '#d4d4d4',
+    cursorAccent: getCSSVar('--bg-terminal') || '#121212',
+    selectionBackground: getCSSVar('--surface-hover') || 'rgba(255, 255, 255, 0.1)',
+    findMatch: getCSSVar('--accent-warning') || '#ff9800',
+    findMatchSelected: getCSSVar('--accent-warning') || '#ff9800',
+    findMatchHighlight: 'rgba(255, 152, 0, 0.4)',
+    findMatchHighlightSelected: 'rgba(255, 152, 0, 0.6)',
+  }
+
+  if (isLight) {
+    // 浅色模式：高对比度颜色，避免紫色/黑色混淆
+    return {
+      ...base,
+      black: '#000000',
+      red: '#d32f2f',
+      green: '#388e3c',
+      yellow: '#e65100',
+      blue: '#1976d2',
+      magenta: '#00838f',   // 用品青色替代紫色
+      cyan: '#00695c',
+      white: '#616161',
+      brightBlack: '#9e9e9e',
+      brightRed: '#f44336',
+      brightGreen: '#4caf50',
+      brightYellow: '#ff9800',
+      brightBlue: '#2196f3',
+      brightMagenta: '#00bcd4',
+      brightCyan: '#009688',
+      brightWhite: '#212121',
+    }
+  }
+
+  return base
+}
+
 function initXterm() {
   if (xterm) return
   if (!xtRef.value) {
@@ -442,7 +507,7 @@ function initXterm() {
   xterm = new Terminal({
     fontSize,
     fontFamily: '"Cascadia Code","Fira Code",Consolas,monospace',
-    theme: { ...terminalTheme.value },
+    theme: getXtermTheme(),
     cursorBlink: true,
     scrollback: 10000
   })
@@ -454,6 +519,14 @@ function initXterm() {
   xterm.loadAddon(xterm._searchAddon)
   xterm.open(xtRef.value)
   fitAddon.fit()
+
+  // 拦截 Ctrl+←/→，让 document 层的快捷键监听处理
+  xterm.attachCustomKeyEventHandler((e) => {
+    if (e.ctrlKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+      return false // 阻止 xterm 处理，让事件冒泡到 document
+    }
+    return true
+  })
 
   // 存储 xterm 实际 DOM 元素（.xterm 容器内的元素）
   xtermEl.value = xtRef.value.querySelector('.xterm') || xtRef.value
@@ -584,8 +657,20 @@ function syncBlocksToXterm() {
 }
 
 // ========== 输入处理（结构化模式） ==========
+let completionHideTimer = null
+
 function onInput() {
-  if (!cmd.value) { showCompletion.value = false; return }
+  if (!cmd.value) {
+    showCompletion.value = false
+    return
+  }
+
+  // 清除之前的隐藏定时器
+  if (completionHideTimer) {
+    clearTimeout(completionHideTimer)
+    completionHideTimer = null
+  }
+
   const sugs = completion.getSuggestions(cmd.value)
   if (sugs.length > 0) {
     completionSuggestions.value = sugs
@@ -595,7 +680,10 @@ function onInput() {
       completionPos.value = { top: rect.top - 210, left: rect.left }
     }
   } else {
-    showCompletion.value = false
+    // 没有补全建议时，延迟隐藏（用户可能还在输入）
+    completionHideTimer = setTimeout(() => {
+      showCompletion.value = false
+    }, 300)
   }
 }
 
@@ -798,11 +886,99 @@ function onKey(e) {
   }
 }
 
+// 按钮发送模式的键盘处理（Enter 换行，Ctrl+Enter 发送）
+function onKeyButton(e) {
+  // 补全弹窗导航
+  if (showCompletion.value && completionRef.value?.handleKey(e.key)) { e.preventDefault(); return }
+
+  // Ctrl+Enter: 发送命令
+  if (e.ctrlKey && e.key === 'Enter') {
+    e.preventDefault()
+    exec()
+    return
+  }
+
+  // Ctrl+C: 中断
+  if (e.ctrlKey && e.key === 'c') {
+    e.preventDefault()
+    bm.cancelCommand()
+    send('\x03')
+    cmd.value = ''
+    showCompletion.value = false
+    return
+  }
+
+  // Tab: 补全
+  if (e.key === 'Tab') {
+    e.preventDefault()
+    if (showCompletion.value && completionSuggestions.value.length > 0) {
+      applyCompletion(completionRef.value?.selectedIndex || 0)
+    } else if (cmd.value) {
+      const sugs = completion.getSuggestions(cmd.value)
+      if (sugs.length === 1) {
+        cmd.value = completion.applyCompletion(cmd.value, sugs[0])
+      } else if (sugs.length > 1) {
+        completionSuggestions.value = sugs
+        showCompletion.value = true
+      }
+    }
+    return
+  }
+
+  // Enter: 换行（不发送），自动调整 textarea 高度
+  if (e.key === 'Enter' && !e.ctrlKey) {
+    nextTick(() => autoResizeTextarea())
+    return
+  }
+
+  // Esc: 关闭补全
+  if (e.key === 'Escape') {
+    showCompletion.value = false
+    return
+  }
+
+  // 历史导航（上下箭头）
+  if (e.key === 'ArrowUp' && !showCompletion.value) {
+    e.preventDefault()
+    const c = ch.getPreviousCommand()
+    if (c !== null) cmd.value = c
+    return
+  }
+  if (e.key === 'ArrowDown' && !showCompletion.value) {
+    e.preventDefault()
+    const c = ch.getNextCommand()
+    if (c !== null) cmd.value = c
+    return
+  }
+}
+
+// 按钮模式的输入处理（自动调整高度）
+function onInputButton() {
+  onInput()
+  nextTick(() => autoResizeTextarea())
+}
+
+// 自动调整 textarea 高度
+function autoResizeTextarea() {
+  const textarea = inpRef.value
+  if (!textarea) return
+  textarea.style.height = 'auto'
+  textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px'
+}
+
 function exec() {
   const c = cmd.value.trim()
   send((c || '') + '\r')
   cmd.value = ''
   xtermBuf = ''
+  showCompletion.value = false
+
+  // 重置 textarea 高度
+  nextTick(() => {
+    if (inpRef.value) {
+      inpRef.value.style.height = 'auto'
+    }
+  })
 
   if (c) {
     // 记录日志
@@ -825,6 +1001,15 @@ function exec() {
 async function send(data) {
   if (status.value !== 'active') return
   try { await SSHService.WriteToTerminalByID(connId, sessionId, data) } catch {}
+}
+
+// 全局键盘处理（Ctrl+F 搜索，无论焦点在哪里）
+function onGlobalKey(e) {
+  if (disposed) return
+  if (e.ctrlKey && e.key === 'f') {
+    e.preventDefault()
+    openSearch()
+  }
 }
 
 // ========== 搜索功能 ==========
@@ -1031,6 +1216,60 @@ function clearAll() {
   bm.clearBlocks()
   if (xterm) xterm.clear()
 }
+
+// ========== 右键菜单 ==========
+function onClassicContextMenu(e) {
+  e.preventDefault()
+  contextMenuPos.value = { x: e.clientX, y: e.clientY }
+  showContextMenu.value = true
+}
+
+function onBlockContextMenu(e) {
+  e.preventDefault()
+  contextMenuPos.value = { x: e.clientX, y: e.clientY }
+  showContextMenu.value = true
+}
+
+function ctxCopy() {
+  // 经典模式：xterm 选区
+  if (xterm && xterm.hasSelection()) {
+    navigator.clipboard.writeText(xterm.getSelection())
+  } else {
+    // 结构化模式：浏览器原生选区
+    const sel = window.getSelection()
+    if (sel && sel.toString()) {
+      navigator.clipboard.writeText(sel.toString())
+    }
+  }
+  showContextMenu.value = false
+}
+
+async function ctxPaste() {
+  try {
+    const text = await navigator.clipboard.readText()
+    if (text) {
+      if (view.value === 'classic') {
+        send(text)
+      } else {
+        // 结构化模式：粘贴到输入框
+        cmd.value += text
+        inpRef.value?.focus()
+      }
+    }
+  } catch {}
+  showContextMenu.value = false
+}
+
+function ctxSelectAll() {
+  if (view.value === 'classic' && xterm) {
+    xterm.selectAll()
+    xterm.focus()
+  } else {
+    // 结构化模式：选中输入框内容
+    inpRef.value?.select()
+  }
+  showContextMenu.value = false
+}
 </script>
 
 <style scoped>
@@ -1059,7 +1298,7 @@ function clearAll() {
 }
 
 .led { width: 6px; height: 6px; border-radius: 50%; }
-.led.active { background: var(--accent-success); box-shadow: 0 0 4px color-mix(in srgb, var(--accent-success) 50%, transparent); }
+.led.active { background: var(--accent-success); box-shadow: 0 0 4px rgba(76,175,80,.5); }
 .led.disconnected, .led.error { background: var(--accent-danger); }
 .led.starting { background: var(--accent-warning); animation: pulse 1s infinite; }
 .st { font-size: 11px; color: var(--text-secondary); }
@@ -1071,12 +1310,12 @@ function clearAll() {
   width: 24px; height: 24px; border: none; border-radius: 4px;
   color: var(--text-muted); cursor: pointer; font-size: 12px; background: transparent;
 }
-.tbb:hover { background: var(--surface-hover); color: var(--text-secondary); }
+.tbb:hover { background: var(--surface-hover); color: var(--text-primary); }
 .tbb.recording { color: var(--accent-danger); animation: pulse 1s infinite; }
 .tbb.vw { font-size: 14px; width: 26px; }
 .tbb.vw.a { background: var(--surface-hover); color: var(--accent-success); }
 
-.sep { width: 1px; height: 14px; background: var(--border-default); margin: 0 4px; }
+.sep { width: 1px; height: 14px; background: var(--surface-hover); margin: 0 4px; }
 
 /* 结构化视图 */
 .view-block {
@@ -1092,7 +1331,7 @@ function clearAll() {
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 8px;
+  padding: 0;
   scroll-behavior: smooth;
 }
 
@@ -1110,7 +1349,7 @@ function clearAll() {
   align-items: center;
   gap: 12px;
   padding: 5px 10px;
-  background: var(--bg-toolbar);
+  background: var(--bg-panel-solid);
   border-top: 1px solid var(--border-default);
   flex-shrink: 0;
   overflow-x: auto;
@@ -1131,8 +1370,8 @@ function clearAll() {
   min-width: 18px;
   height: 16px;
   padding: 0 4px;
-  background: var(--surface-2);
-  border: 1px solid var(--border-strong);
+  background: var(--border-default);
+  border: 1px solid var(--border-default);
   border-radius: 3px;
   font-size: 9px;
   color: var(--text-secondary);
@@ -1142,7 +1381,7 @@ function clearAll() {
 .shortcut-more {
   background: transparent;
   border: none;
-  color: var(--primary-light);
+  color: var(--primary-light, #7aa2f7);
   font-size: 10px;
   cursor: pointer;
   padding: 2px 6px;
@@ -1155,14 +1394,14 @@ function clearAll() {
 
 .shortcut.app kbd {
   background: var(--success-bg);
-  border-color: var(--success-bg);
+  border-color: var(--border-success);
   color: var(--accent-success);
 }
 
 .sep {
   width: 1px;
   height: 12px;
-  background: var(--border-default);
+  background: var(--surface-hover);
   margin: 0 4px;
 }
 
@@ -1184,11 +1423,41 @@ function clearAll() {
 
 .view-classic :deep(.xterm-viewport) {
   overflow-y: auto !important;
-  background-color: transparent !important;
+  background-color: var(--bg-terminal) !important;
 }
 
 .view-classic :deep(.xterm-screen) {
   padding: 0;
+}
+
+/* 覆盖 xterm DOM 渲染器的内联样式 */
+.view-classic :deep(.xterm-rows) {
+  color: var(--text-primary) !important;
+}
+
+.view-classic :deep(.xterm-rows .xterm-cursor-block) {
+  background-color: var(--text-primary) !important;
+  color: var(--bg-terminal) !important;
+}
+
+.view-classic :deep(.xterm-rows .xterm-cursor-outline) {
+  outline-color: var(--text-primary) !important;
+}
+
+.view-classic :deep(.xterm-rows .xterm-cursor-bar) {
+  box-shadow: 1px 0 0 var(--text-primary) inset !important;
+}
+
+.view-classic :deep(.xterm-rows .xterm-cursor-underline) {
+  border-bottom-color: var(--text-primary) !important;
+}
+
+.view-classic :deep(.focus .xterm-selection div) {
+  background-color: var(--surface-hover) !important;
+}
+
+.view-classic :deep(.xterm-selection div) {
+  background-color: var(--surface-hover) !important;
 }
 
 /* 输入栏 */
@@ -1224,11 +1493,43 @@ function clearAll() {
 .ci::placeholder { color: var(--text-muted); }
 .ci:disabled { opacity: .4; }
 
+.ci-textarea {
+  resize: none;
+  min-height: 20px;
+  max-height: 120px;
+  overflow-y: auto;
+  line-height: 1.4;
+}
+
+.send-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--primary-bg);
+  border: 1px solid var(--border-accent);
+  border-radius: 4px;
+  color: var(--primary-light);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.send-btn:hover:not(:disabled) {
+  background: var(--primary-bg-hover);
+}
+
+.send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* 滚动条 */
 .bp::-webkit-scrollbar { width: 6px; }
 .bp::-webkit-scrollbar-track { background: transparent; }
-.bp::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
-.bp::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+.bp::-webkit-scrollbar-thumb { background: var(--surface-hover); border-radius: 3px; }
+.bp::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
@@ -1236,12 +1537,12 @@ function clearAll() {
 .view-classic :deep(.xterm-decoration-top),
 .view-classic :deep(.xterm-decoration-bottom),
 .view-classic :deep(.xterm-find-result-decoration) {
-  background: color-mix(in srgb, var(--accent-warning) 50%, transparent) !important;
+  background: rgba(255, 152, 0, 0.5) !important;
 }
 
 .view-classic :deep(.xterm-decoration-over),
 .view-classic :deep(.xterm-find-result-selected-decoration) {
-  background: color-mix(in srgb, var(--accent-warning) 80%, transparent) !important;
+  background: rgba(255, 152, 0, 0.8) !important;
 }
 
 /* 搜索栏 */
@@ -1258,9 +1559,8 @@ function clearAll() {
   gap: 6px;
   padding: 6px 10px;
   background: var(--bg-toolbar);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-default);
   border-radius: 6px;
-  box-shadow: var(--shadow-md);
 }
 
 .search-box svg { color: var(--text-muted); flex-shrink: 0; }
@@ -1296,12 +1596,12 @@ function clearAll() {
 }
 
 .search-btn:hover { background: var(--surface-hover); color: var(--text-secondary); }
-.search-btn.close:hover { background: var(--danger-bg); color: var(--accent-danger); }
+.search-btn.close:hover { background: rgba(244,67,54,.15); color: var(--accent-danger); }
 
 /* 块高亮（搜索结果） */
 :deep(.terminal-block.highlight) {
   border-color: var(--accent-warning) !important;
-  box-shadow: 0 0 8px color-mix(in srgb, var(--accent-warning) 30%, transparent);
+  box-shadow: 0 0 8px rgba(255,152,0,.3);
 }
 
 /* 搜索栏动画 */

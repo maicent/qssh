@@ -4,8 +4,8 @@
       <div v-if="confirmState.show" class="cd-mask" @click.self="handleCancel">
         <div class="cd-modal" :class="{ 'cd-danger': confirmState.danger }">
           <div class="cd-icon">
-            <svg v-if="confirmState.danger" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-danger)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <svg v-else width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <svg v-if="confirmState.danger" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fc8181" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <svg v-else width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#63b3ed" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           </div>
           <h3 class="cd-title">{{ confirmState.title }}</h3>
           <p class="cd-message">{{ confirmState.message }}</p>
@@ -36,13 +36,13 @@ const { confirmState, handleConfirm, handleCancel } = useConfirm()
 }
 
 .cd-modal {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-default);
+  background: var(--bg-toolbar);
+  border: 1px solid var(--surface-hover);
   border-radius: 12px;
   padding: 1.5rem;
   width: 360px;
   max-width: 90vw;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 16px 48px var(--shadow-lg);
   text-align: center;
 }
 
@@ -85,7 +85,7 @@ const { confirmState, handleConfirm, handleCancel } = useConfirm()
 }
 
 .cd-btn-cancel {
-  background: var(--surface-2);
+  background: var(--border-subtle);
   border-color: var(--border-default);
   color: var(--text-secondary);
 }
@@ -109,7 +109,7 @@ const { confirmState, handleConfirm, handleCancel } = useConfirm()
   color: var(--accent-danger);
 }
 .cd-btn-danger:hover {
-  background: color-mix(in srgb, var(--accent-danger), transparent 75%);
+  background: var(--danger-bg);
 }
 
 .cd-fade-enter-active,

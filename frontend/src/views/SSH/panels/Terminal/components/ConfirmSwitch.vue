@@ -3,7 +3,7 @@
     <div v-if="visible" class="mask" @mousedown.self="$emit('cancel')">
       <div class="dialog">
         <div class="dialog-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-warning)" stroke-width="2">
+          <svg class="dialog-icon-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/>
             <line x1="12" y1="8" x2="12" y2="12"/>
             <line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -50,18 +50,22 @@ defineEmits(['confirm', 'cancel'])
 }
 
 .dialog {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-strong);
+  background: var(--bg-toolbar);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   padding: 24px;
   max-width: 380px;
   width: 90%;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 16px 48px var(--shadow-lg);
   text-align: center;
 }
 
 .dialog-icon {
   margin-bottom: 16px;
+}
+
+.dialog-icon-svg {
+  color: var(--warning-light, #ff9800);
 }
 
 .dialog-title {
@@ -73,7 +77,7 @@ defineEmits(['confirm', 'cancel'])
 .dialog-desc {
   margin: 0 0 24px;
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   line-height: 1.5;
 }
 
@@ -96,23 +100,23 @@ defineEmits(['confirm', 'cancel'])
 }
 
 .btn-cancel {
-  background: var(--surface-2);
+  background: var(--surface-hover);
   color: var(--text-secondary);
 }
 
 .btn-cancel:hover {
-  background: var(--surface-hover);
+  background: var(--border-default);
   color: var(--text-primary);
 }
 
 .btn-confirm {
   background: var(--success-bg);
   color: var(--accent-success);
-  border: 1px solid var(--success-bg);
+  border: 1px solid var(--border-success);
 }
 
 .btn-confirm:hover {
-  background: color-mix(in srgb, var(--accent-success) 30%, transparent);
+  background: var(--border-success);
 }
 
 .fade-enter-active { transition: all .2s ease; }

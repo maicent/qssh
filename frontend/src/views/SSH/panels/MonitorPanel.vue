@@ -5,7 +5,7 @@
       <!-- CPU -->
       <div class="stat-card cpu">
         <div class="card-header">
-          <svg class="card-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+          <svg class="card-icon icon-cpu" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
           <span class="card-title">CPU</span>
         </div>
         <div class="card-body">
@@ -32,7 +32,7 @@
       <!-- 内存 -->
       <div class="stat-card memory">
         <div class="card-header">
-          <svg class="card-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="14"/><line x1="10" y1="10" x2="10" y2="14"/><line x1="14" y1="10" x2="14" y2="14"/><line x1="18" y1="10" x2="18" y2="14"/><line x1="2" y1="10" x2="2" y2="6"/><line x1="22" y1="10" x2="22" y2="6"/></svg>
+          <svg class="card-icon icon-memory" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="14"/><line x1="10" y1="10" x2="10" y2="14"/><line x1="14" y1="10" x2="14" y2="14"/><line x1="18" y1="10" x2="18" y2="14"/><line x1="2" y1="10" x2="2" y2="6"/><line x1="22" y1="10" x2="22" y2="6"/></svg>
           <span class="card-title">内存</span>
         </div>
         <div class="card-body">
@@ -62,7 +62,7 @@
       <!-- 磁盘 -->
       <div class="stat-card disk">
         <div class="card-header">
-          <svg class="card-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/></svg>
+          <svg class="card-icon icon-disk" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/></svg>
           <span class="card-title">磁盘</span>
         </div>
         <div class="card-body">
@@ -87,7 +87,7 @@
               <polyline
                 :points="getDiskIoPoints()"
                 fill="none"
-                stroke="var(--accent-info)"
+                class="chart-line-primary"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -101,7 +101,7 @@
       <!-- 网络 -->
       <div class="stat-card network">
         <div class="card-header">
-          <svg class="card-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <svg class="card-icon icon-network" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           <span class="card-title">网络</span>
         </div>
         <div class="card-body">
@@ -122,7 +122,7 @@
               <polyline
                 :points="getNetworkRxPoints()"
                 fill="none"
-                stroke="var(--accent-success)"
+                class="chart-line-success"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -131,7 +131,7 @@
               <polyline
                 :points="getNetworkTxPoints()"
                 fill="none"
-                stroke="var(--warning-light)"
+                class="chart-line-warning"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -537,12 +537,17 @@ const formatBytes = (bytes) => {
 // 获取 CPU 渐变色
 const getCpuGradient = () => {
   const percent = systemStats.value?.cpu?.usagePercent || 0
+  const cs = getComputedStyle(document.documentElement)
+  const bg = cs.getPropertyValue('--surface-3').trim() || '#2d3748'
+  const green = cs.getPropertyValue('--accent-success').trim() || '#48bb78'
+  const yellow = cs.getPropertyValue('--accent-warning').trim() || '#ecc94b'
+  const red = cs.getPropertyValue('--danger-light').trim() || '#f56565'
   if (percent < 50) {
-    return `conic-gradient(var(--accent-success) ${percent}%, var(--bg-panel-solid) ${percent}%)`
+    return `conic-gradient(${green} ${percent}%, ${bg} ${percent}%)`
   } else if (percent < 80) {
-    return `conic-gradient(var(--accent-warning) ${percent}%, var(--bg-panel-solid) ${percent}%)`
+    return `conic-gradient(${yellow} ${percent}%, ${bg} ${percent}%)`
   } else {
-    return `conic-gradient(var(--accent-danger) ${percent}%, var(--bg-panel-solid) ${percent}%)`
+    return `conic-gradient(${red} ${percent}%, ${bg} ${percent}%)`
   }
 }
 
@@ -644,17 +649,17 @@ onUnmounted(() => {
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
   padding: 1rem;
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--surface-hover);
   max-height: 45%;
   overflow-y: auto;
   flex-shrink: 0;
 }
 
 .stat-card {
-  background: var(--surface-1);
+  background: var(--card-bg);
   border-radius: 0.5rem;
   padding: 1rem;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-default);
 }
 
 .card-header {
@@ -668,21 +673,14 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
-.cpu .card-icon {
-  color: var(--accent-info);
-}
+.icon-cpu { color: var(--primary-light); }
+.icon-memory { color: var(--accent-success); }
+.icon-disk { color: var(--accent-warning); }
+.icon-network { color: var(--warning-light); }
 
-.memory .card-icon {
-  color: var(--accent-success);
-}
-
-.disk .card-icon {
-  color: var(--accent-warning);
-}
-
-.network .card-icon {
-  color: var(--warning-light);
-}
+.chart-line-primary { stroke: var(--primary-light); }
+.chart-line-success { stroke: var(--accent-success); }
+.chart-line-warning { stroke: var(--warning-light); }
 
 .card-title {
   color: var(--text-primary);
@@ -713,7 +711,7 @@ onUnmounted(() => {
   position: absolute;
   width: 60px;
   height: 60px;
-  background: var(--bg-panel-solid);
+  background: var(--bg-panel);
   border-radius: 50%;
 }
 
@@ -729,7 +727,7 @@ onUnmounted(() => {
 .usage-bar {
   width: 100%;
   height: 8px;
-  background: var(--surface-2);
+  background: var(--surface-3);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -845,7 +843,7 @@ onUnmounted(() => {
 .chart-container {
   margin-top: 0.5rem;
   padding-top: 0.5rem;
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--surface-1);
   position: relative;
 }
 
@@ -900,7 +898,7 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--surface-hover);
 }
 
 .section-header h3 {
@@ -945,7 +943,7 @@ onUnmounted(() => {
 .process-table thead {
   position: sticky;
   top: 0;
-  background: var(--bg-panel);
+  background: var(--toolbar-3);
   z-index: 1;
 }
 
@@ -954,7 +952,7 @@ onUnmounted(() => {
   text-align: left;
   color: var(--text-secondary);
   font-weight: 600;
-  border-bottom: 2px solid var(--border-default);
+  border-bottom: 2px solid var(--surface-hover);
   white-space: nowrap;
 }
 
@@ -975,7 +973,7 @@ onUnmounted(() => {
 .process-table td {
   padding: 0.5rem 0.75rem;
   color: var(--text-primary);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--surface-1);
 }
 
 .process-row:hover {
@@ -996,7 +994,7 @@ onUnmounted(() => {
 }
 
 .usage-medium {
-  color: var(--warning-light);
+  color: var(--accent-warning);
 }
 
 .usage-high {
@@ -1018,7 +1016,7 @@ onUnmounted(() => {
 
 .kill-btn:hover {
   background: var(--danger-bg);
-  border-color: var(--accent-danger);
+  border-color: var(--border-danger);
 }
 
 /* 操作按钮组 */
@@ -1040,14 +1038,14 @@ onUnmounted(() => {
 
 .signal-btn:hover {
   background: var(--primary-bg-hover);
-  border-color: var(--accent-primary);
+  border-color: var(--border-accent);
 }
 
 /* 信号下拉菜单 */
 .signal-dropdown {
   position: fixed;
-  background: var(--bg-panel-solid);
-  border: 1px solid var(--border-default);
+  background: var(--bg-tooltip);
+  border: 1px solid var(--border-strong);
   border-radius: 0.5rem;
   box-shadow: var(--shadow-lg);
   padding: 0.5rem;
@@ -1071,7 +1069,7 @@ onUnmounted(() => {
   padding: 0.5rem;
   color: var(--text-secondary);
   font-size: 0.75rem;
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--surface-hover);
   margin-bottom: 0.375rem;
 }
 
@@ -1103,11 +1101,11 @@ onUnmounted(() => {
 
 /* 滚动条 */
 .process-table-container::-webkit-scrollbar {
-  width: var(--scrollbar-width);
+  width: 6px;
 }
 
 .process-table-container::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
+  background: transparent;
 }
 
 .process-table-container::-webkit-scrollbar-thumb {

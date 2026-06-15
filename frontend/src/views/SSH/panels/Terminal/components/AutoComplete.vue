@@ -107,10 +107,10 @@ defineExpose({ handleKey })
   bottom: 100%;
   left: 40px;
   margin-bottom: 4px;
-  background: var(--bg-panel);
+  background: var(--bg-toolbar);
   border: 1px solid var(--border-default);
   border-radius: 6px;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 16px var(--shadow-lg);
   z-index: 100;
   min-width: 280px;
   max-width: 450px;
@@ -138,12 +138,12 @@ defineExpose({ handleKey })
 
 .suggestion-item:hover,
 .suggestion-item.selected {
-  background: var(--bg-hover);
+  background: var(--surface-hover);
 }
 
 .suggestion-icon {
   flex-shrink: 0;
-  color: var(--text-disabled);
+  color: var(--text-muted);
 }
 
 .suggestion-icon.command { color: var(--accent-success); }
@@ -159,7 +159,7 @@ defineExpose({ handleKey })
 
 .suggestion-desc {
   font-size: 11px;
-  color: var(--text-disabled);
+  color: var(--text-muted);
   margin-left: auto;
   white-space: nowrap;
   overflow: hidden;
@@ -169,12 +169,12 @@ defineExpose({ handleKey })
 
 .popup-footer {
   padding: 4px 8px;
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--surface-hover);
 }
 
 .hint {
   font-size: 10px;
-  color: var(--text-disabled);
+  color: var(--text-muted);
 }
 
 .popup-enter-active { transition: all .15s ease; }
@@ -183,5 +183,5 @@ defineExpose({ handleKey })
 
 .suggestions-list::-webkit-scrollbar { width: 4px; }
 .suggestions-list::-webkit-scrollbar-track { background: transparent; }
-.suggestions-list::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 2px; }
+.suggestions-list::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 2px; }
 </style>

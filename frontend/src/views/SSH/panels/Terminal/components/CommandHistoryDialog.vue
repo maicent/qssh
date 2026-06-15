@@ -7,7 +7,7 @@
           <h3 class="dialog-title">命令历史</h3>
           <div class="header-actions">
             <button class="header-btn" :class="{ active: showFavorites }" @click="showFavorites = !showFavorites" title="收藏">
-              <svg width="14" height="14" viewBox="0 0 24 24" :fill="showFavorites ? 'var(--accent-warning)' : 'none'" stroke="currentColor" stroke-width="2">
+              <svg width="14" height="14" viewBox="0 0 24 24" :fill="showFavorites ? '#e0af68' : 'none'" stroke="currentColor" stroke-width="2">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
             </button>
@@ -132,8 +132,8 @@ function formatTime(timestamp) {
 
 .dialog {
   width: 480px; max-width: 90vw; max-height: 60vh;
-  background: var(--bg-panel); border: 1px solid var(--border-default); border-radius: 10px;
-  box-shadow: var(--shadow-lg);
+  background: var(--bg-panel-solid); border: 1px solid var(--surface-hover); border-radius: 10px;
+  box-shadow: 0 16px 48px var(--shadow-lg);
   display: flex; flex-direction: column; overflow: hidden;
 }
 
@@ -213,7 +213,7 @@ function formatTime(timestamp) {
 
 .command-list::-webkit-scrollbar { width: 4px; }
 .command-list::-webkit-scrollbar-track { background: transparent; }
-.command-list::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 2px; }
+.command-list::-webkit-scrollbar-thumb { background: var(--surface-hover); border-radius: 2px; }
 
 .fade-enter-active { transition: all .2s ease; }
 .fade-leave-active { transition: all .15s ease; }

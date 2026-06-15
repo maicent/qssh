@@ -84,7 +84,7 @@ function moveXterm(toPopup) {
 .mini-terminal-mask {
   position: fixed;
   inset: 0;
-  background: var(--bg-overlay);
+  background: var(--shadow-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -97,10 +97,10 @@ function moveXterm(toPopup) {
   max-width: 90vw;
   height: 450px;
   max-height: 70vh;
-  background: var(--bg-terminal);
-  border: 1px solid var(--border-strong);
+  background: var(--bg-panel-solid);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 16px 48px var(--bg-overlay);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -111,8 +111,8 @@ function moveXterm(toPopup) {
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
-  background: var(--bg-toolbar);
-  border-bottom: 1px solid var(--border-default);
+  background: var(--bg-input);
+  border-bottom: 1px solid var(--surface-hover);
   flex-shrink: 0;
 }
 

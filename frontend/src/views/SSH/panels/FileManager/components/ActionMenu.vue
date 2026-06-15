@@ -101,10 +101,10 @@ defineEmits([
 .context-menu {
   position: fixed;
   min-width: 180px;
-  background: var(--bg-panel-solid);
-  border: 1px solid var(--border-default);
+  background: var(--bg-tooltip);
+  border: 1px solid var(--border-strong);
   border-radius: 0.5rem;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 12px var(--shadow-lg);
   z-index: 9999;
   padding: 0.5rem 0;
 }
@@ -134,7 +134,7 @@ defineEmits([
 
 .menu-divider {
   height: 1px;
-  background: var(--border-default);
+  background: var(--surface-hover);
   margin: 0.5rem 0;
 }
 </style>

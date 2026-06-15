@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { SSHService } from "../../../bindings/changeme/ssh"
+import { SSHService, SSHConfig } from "../../../bindings/changeme/ssh"
 import { useSSHConnectionsStore } from '../../stores/sshConnections'
-import { Dialogs } from '@wailsio/runtime'
+import { useConfigStore } from '../../stores/config'
+import { Events, Dialogs } from '@wailsio/runtime'
 import ConnectionOptionsDialog from './ConnectionOptionsDialog.vue'
 import Message from '../../components/Message.vue'
 
@@ -90,15 +91,14 @@ const testConnection = async () => {
 
   loading.value = true
   try {
-    // 直接传递配置对象给后端
-    await SSHService.TestConnection({
+    await SSHService.TestConnection(new SSHConfig({
       host: formData.host,
       port: formData.port,
       username: formData.username,
       password: formData.authType === 'password' ? formData.password : undefined,
       privateKey: formData.authType === 'key' ? formData.privateKey : undefined,
       timeout: formData.timeout
-    })
+    }))
 
     messageRef.value?.success('连接测试成功！')
   } catch (error: any) {
@@ -111,7 +111,7 @@ const testConnection = async () => {
 // 立即连接
 const saveAndConnect = async () => {
   console.log('[NewConnection] ========== 开始连接流程 ==========')
-  
+
   if (!validateForm()) {
     console.log('[NewConnection] ❌ 表单验证失败')
     return
@@ -119,7 +119,7 @@ const saveAndConnect = async () => {
 
   // 检查是否已经有SSH窗口打开
   const hasExistingWindow = await checkExistingSSHWindow()
-  
+
   // 先保存配置
   pendingConfig.value = {
     name: formData.name || `${formData.username}@${formData.host}`,
@@ -130,15 +130,39 @@ const saveAndConnect = async () => {
     privateKey: formData.authType === 'key' ? formData.privateKey : undefined,
     timeout: formData.timeout
   }
-  
+
   if (!hasExistingWindow) {
     // 第一个连接，直接使用默认分组，不显示对话框
     console.log('[NewConnection] 🎯 第一个连接，直接使用默认分组')
     await handleDialogSelect('default-group')
   } else {
-    // 已有窗口，显示选择对话框
-    console.log('[NewConnection] ✅ 已有窗口，显示选择对话框')
-    showDialog.value = true
+    // 已有窗口，根据配置决定行为
+    const configStore = useConfigStore()
+    await configStore.init()
+
+    // 诊断日志：打印完整配置
+    console.log('[NewConnection] 📋 完整配置对象:', JSON.stringify(configStore.config, null, 2))
+    console.log('[NewConnection] 📋 advanced 分组:', configStore.config?.advanced)
+
+    const groupBehavior = configStore.get('advanced', 'groupBehavior')
+    console.log('[NewConnection] 📋 原始 groupBehavior 值:', groupBehavior, '类型:', typeof groupBehavior)
+
+    const finalBehavior = groupBehavior || 'prompt'
+    console.log('[NewConnection] 📋 最终分组行为:', finalBehavior)
+
+    if (finalBehavior === 'join_default') {
+      // 自动加入默认分组
+      console.log('[NewConnection] 🎯 自动加入默认分组')
+      await handleDialogSelect('default-group')
+    } else if (finalBehavior === 'new_window') {
+      // 自动打开新窗口
+      console.log('[NewConnection] 🪟 自动打开新窗口')
+      await handleDialogSelect('new-window')
+    } else {
+      // 弹出选择对话框（默认行为）
+      console.log('[NewConnection] ✅ 显示选择对话框')
+      showDialog.value = true
+    }
   }
 }
 
@@ -151,7 +175,7 @@ const checkExistingSSHWindow = async (): Promise<boolean> => {
     
     // 检查是否有非空分组（除了默认分组）
     for (const group of groups) {
-      if (group.conn_ids && group.conn_ids.length > 0) {
+      if (group && group.conn_ids && group.conn_ids.length > 0) {
         console.log('[NewConnection] ✅ 发现已有连接的分组:', group.id)
         return true
       }
@@ -221,9 +245,16 @@ const handleDialogSelect = async (type: string) => {
     console.log('[NewConnection]    - groupName:', config.name)
     console.log('[NewConnection]    - activeConn:', result.connID)
     
-    await SSHService.OpenSSHWindow(result.groupID, config.name, result.connID)
-    
+    await SSHService.OpenSSHWindow(result.groupID!, config.name!, result.connID!)
+
     console.log('[NewConnection] 🪟 窗口操作完成')
+
+    // 如果开启了自动托盘，连接成功后隐藏主窗口
+    const configStore = useConfigStore()
+    await configStore.init()
+    if (configStore.get('ui', 'autoTray')) {
+      Events.Emit('ssh:tray-hide')
+    }
     
   } catch (error: any) {
     console.error('[NewConnection] ❌ 错误:', error)
@@ -435,7 +466,7 @@ const resetForm = () => {
   font-weight: 600;
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.75rem;
-  border-bottom: 0.0625rem solid var(--border-default);
+  border-bottom: 0.0625rem solid var(--surface-hover);
 }
 
 .form-grid {
@@ -462,8 +493,8 @@ const resetForm = () => {
 
 .form-input {
   padding: 0.625rem 0.875rem;
-  background: var(--bg-input);
-  border: 0.0625rem solid var(--border-default);
+  background: var(--bg-panel);
+  border: 0.0625rem solid var(--border-strong);
   border-radius: 0.5rem;
   color: var(--text-primary);
   font-size: 0.9375rem;
@@ -489,8 +520,8 @@ const resetForm = () => {
 .auth-btn {
   flex: 1;
   padding: 0.625rem 1rem;
-  background: var(--bg-input);
-  border: 0.0625rem solid var(--border-default);
+  background: var(--bg-panel);
+  border: 0.0625rem solid var(--border-strong);
   border-radius: 0.5rem;
   color: var(--text-secondary);
   font-size: 0.875rem;
@@ -499,8 +530,8 @@ const resetForm = () => {
 }
 
 .auth-btn:hover {
-  background: var(--surface-hover);
-  border-color: var(--border-default);
+  background: var(--bg-toolbar);
+  border-color: var(--scrollbar-thumb-hover);
   color: var(--text-primary);
 }
 
@@ -518,7 +549,7 @@ const resetForm = () => {
   line-height: 1.6;
   resize: vertical;
   background: var(--bg-input);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--surface-hover);
   border-radius: 0.5rem;
   padding: 0.75rem;
   color: var(--text-primary);
@@ -532,7 +563,7 @@ const resetForm = () => {
 }
 
 .key-textarea::placeholder {
-  color: var(--text-muted);
+  color: var(--text-disabled);
 }
 
 .action-section {
@@ -562,12 +593,12 @@ const resetForm = () => {
 }
 
 .btn-reset {
-  background: var(--surface-2);
+  background: var(--surface-hover);
   color: var(--text-primary);
 }
 
 .btn-reset:hover:not(:disabled) {
-  background: var(--surface-hover);
+  background: var(--border-strong);
 }
 
 .btn-test {
@@ -576,9 +607,9 @@ const resetForm = () => {
 }
 
 .btn-test:hover:not(:disabled) {
-  filter: brightness(1.1);
+  background: var(--warning-light);
   transform: translateY(-0.0625rem);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 0.25rem 0.75rem var(--warning-bg);
 }
 
 .btn-connect {
@@ -587,9 +618,9 @@ const resetForm = () => {
 }
 
 .btn-connect:hover:not(:disabled) {
-  filter: brightness(1.1);
+  background: var(--success-light);
   transform: translateY(-0.0625rem);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 0.25rem 0.75rem var(--success-bg);
 }
 
 /* 滚动条样式 */
@@ -598,7 +629,7 @@ const resetForm = () => {
 }
 
 .form-section::-webkit-scrollbar-track {
-  background: var(--surface-1);
+  background: var(--bg-input);
   border-radius: 0.25rem;
 }
 

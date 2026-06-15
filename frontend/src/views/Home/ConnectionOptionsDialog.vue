@@ -71,7 +71,7 @@ const handleCancel = () => {
 
 .dialog-container {
   background: var(--bg-panel-solid);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--surface-hover);
   border-radius: 12px;
   padding: 24px;
   min-width: 400px;
@@ -99,21 +99,21 @@ const handleCancel = () => {
   gap: 16px;
   padding: 16px;
   background: var(--surface-2);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--surface-hover);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .option-item:hover {
-  background: var(--bg-hover);
-  border-color: color-mix(in srgb, var(--accent-primary), transparent 50%);
+  background: var(--surface-3);
+  border-color: var(--border-accent);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .option-item.cancel:hover {
-  border-color: color-mix(in srgb, var(--accent-danger), transparent 50%);
+  border-color: var(--border-danger);
 }
 
 .option-icon {

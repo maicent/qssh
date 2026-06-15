@@ -90,16 +90,16 @@ function close() {
 .search-input-wrapper {
   display: flex;
   align-items: center;
-  background: var(--bg-panel);
-  border: 1px solid var(--border-default);
+  background: rgba(26, 27, 38, 0.98);
+  border: 1px solid var(--surface-hover);
   border-radius: 8px;
   padding: 4px 8px;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 16px var(--bg-overlay);
   backdrop-filter: blur(12px);
 }
 
 .search-icon {
-  color: var(--text-muted);
+  color: var(--text-muted, #565f89);
   margin-right: 8px;
   flex-shrink: 0;
 }
@@ -109,13 +109,13 @@ function close() {
   background: transparent;
   border: none;
   outline: none;
-  color: var(--text-primary);
+  color: var(--text-primary, #c0caf5);
   font-size: 13px;
   font-family: inherit;
 }
 
 .search-input::placeholder {
-  color: var(--text-muted);
+  color: var(--text-muted, #565f89);
 }
 
 .search-actions {
@@ -134,19 +134,19 @@ function close() {
   background: transparent;
   border: none;
   border-radius: 4px;
-  color: var(--text-secondary);
+  color: var(--text-secondary, #a9b1d6);
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .search-btn:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: var(--border-default);
+  color: var(--text-primary, #c0caf5);
 }
 
 .search-btn.close:hover {
-  background: var(--danger-bg);
-  color: var(--accent-danger);
+  background: var(--danger-bg, rgba(247, 118, 142, 0.15));
+  color: var(--accent-danger, #f7768e);
 }
 
 /* 动画 */

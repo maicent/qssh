@@ -9,7 +9,7 @@
     height="90%"
     :border-radius="6"
     :body-padding="0"
-    background-color="var(--bg-panel-solid)"
+    background-color="var(--bg-tooltip)"
     border-color="var(--border-default)"
     :overlay-opacity="0.85"
     :overlay-blur="6"
@@ -324,7 +324,7 @@ onUnmounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--bg-panel-solid);
+  background: var(--bg-toolbar);
   border-radius: 6px;
   overflow: hidden;
 }
@@ -335,7 +335,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem 1rem;
-  background: var(--bg-toolbar);
+  background: var(--bg-panel-solid);
   border-bottom: 1px solid var(--border-default);
   flex-shrink: 0;
 }
@@ -363,7 +363,7 @@ onUnmounted(() => {
 }
 
 .toolbar-btn:hover {
-  background: var(--surface-hover);
+  background: var(--border-default);
   color: var(--text-primary);
 }
 
@@ -448,7 +448,7 @@ onUnmounted(() => {
   justify-content: center;
   align-items: center;
   padding: 2rem;
-  background: var(--surface-1);
+  background: var(--surface-2);
 }
 
 .media-preview img {
@@ -479,7 +479,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 0.375rem 1rem;
-  background: var(--bg-toolbar);
+  background: var(--bg-panel-solid);
   border-top: 1px solid var(--border-default);
   font-size: 0.75rem;
   flex-shrink: 0;
@@ -498,7 +498,7 @@ onUnmounted(() => {
 }
 
 .status-item.modified {
-  color: var(--accent-warning);
+  color: var(--warning-light);
   font-weight: 500;
 }
 </style>

@@ -197,10 +197,10 @@ function formatTime(timestamp) {
 .dialog {
   width: 560px;
   max-height: 70vh;
-  background: var(--bg-panel);
-  border: 1px solid var(--border-default);
+  background: #1a1b26;
+  border: 1px solid var(--surface-hover);
   border-radius: 12px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 16px 48px var(--shadow-lg);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -236,8 +236,8 @@ function formatTime(timestamp) {
 }
 
 .close-btn:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: var(--border-default);
+  color: var(--text-secondary);
 }
 
 .search-bar {
@@ -283,12 +283,12 @@ function formatTime(timestamp) {
 }
 
 .session-item:hover {
-  background: var(--bg-hover);
+  background: var(--surface-1);
 }
 
 .session-item.active {
   background: var(--primary-bg);
-  border: 1px solid var(--border-accent);
+  border: 1px solid var(--primary-bg);
 }
 
 .session-status {
@@ -304,7 +304,7 @@ function formatTime(timestamp) {
 
 .session-status.active .status-dot {
   background: var(--accent-success);
-  box-shadow: 0 0 6px color-mix(in srgb, var(--accent-success), transparent 50%);
+  box-shadow: 0 0 6px var(--success-bg);
 }
 
 .session-status.disconnected .status-dot {
@@ -340,7 +340,7 @@ function formatTime(timestamp) {
 .ai-badge {
   font-size: 9px;
   padding: 1px 4px;
-  background: color-mix(in srgb, var(--accent-purple), transparent 80%);
+  background: var(--accent-purple);
   color: var(--accent-purple);
   border-radius: 3px;
   font-weight: 600;
@@ -375,7 +375,7 @@ function formatTime(timestamp) {
 .tag {
   font-size: 10px;
   padding: 2px 6px;
-  background: var(--surface-2);
+  background: var(--surface-1);
   color: var(--text-secondary);
   border-radius: 4px;
 }
@@ -407,12 +407,12 @@ function formatTime(timestamp) {
 }
 
 .action-btn:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: var(--border-default);
+  color: var(--text-secondary);
 }
 
 .action-btn.reconnect:hover {
-  background: var(--warning-bg);
+  background: var(--warning-bg, rgba(224, 175, 104, 0.15));
   color: var(--accent-warning);
 }
 

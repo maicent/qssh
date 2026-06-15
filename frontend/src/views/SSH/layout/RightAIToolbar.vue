@@ -61,8 +61,8 @@ const togglePanel = (panelType) => {
 .right-sidebar {
   width: 3.5rem;
   height: 100%;
-  background: var(--bg-sidebar);
-  border-left: 1px solid var(--border-subtle);
+  background: var(--toolbar-1);
+  border-left: 0.0625rem solid var(--surface-hover);
   padding: 0.75rem 0;
   display: flex;
   flex-direction: column;
@@ -79,7 +79,7 @@ const togglePanel = (panelType) => {
 .divider {
   height: 1px;
   margin: 0.5rem 0.75rem;
-  background: var(--border-default);
+  background: var(--surface-hover);
 }
 
 .tool-btn {
@@ -92,14 +92,14 @@ const togglePanel = (panelType) => {
   background: transparent;
   border: none;
   border-radius: 0.5rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .tool-btn:hover {
   background: var(--surface-hover);
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 .tool-btn.active {

@@ -140,7 +140,7 @@ defineEmits(['open-file', 'sort', 'show-menu', 'select-file', 'select-all'])
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid var(--surface-2);
+  border: 3px solid var(--surface-hover);
   border-top-color: var(--accent-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -168,7 +168,7 @@ defineEmits(['open-file', 'sort', 'show-menu', 'select-file', 'select-all'])
   text-align: left;
   color: var(--text-secondary);
   font-weight: 600;
-  border-bottom: 2px solid var(--border-default);
+  border-bottom: 2px solid var(--surface-hover);
   white-space: nowrap;
 }
 
@@ -189,7 +189,7 @@ defineEmits(['open-file', 'sort', 'show-menu', 'select-file', 'select-all'])
 .file-table td {
   padding: 0.5rem 0.75rem;
   color: var(--text-primary);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--surface-1);
   vertical-align: middle;
 }
 
@@ -199,7 +199,7 @@ defineEmits(['open-file', 'sort', 'show-menu', 'select-file', 'select-all'])
 }
 
 .file-row:hover {
-  background: var(--primary-bg);
+  background: var(--bg-hover);
 }
 
 .file-name {

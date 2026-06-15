@@ -102,22 +102,22 @@ const statusText = computed(() => {
 <style scoped>
 .terminal-status-bar {
   height: 22px; display: flex; align-items: center; justify-content: space-between;
-  padding: 0 10px; background: var(--bg-toolbar); border-top: 1px solid var(--border-default); flex-shrink: 0;
+  padding: 0 10px; background: var(--bg-panel-solid); border-top: 1px solid var(--border-default, #222); flex-shrink: 0;
 }
 .status-left, .status-center, .status-right { display: flex; align-items: center; gap: 10px; }
 .status-left { flex: 1; min-width: 0; }
 .status-center { flex-shrink: 0; }
 .status-right { flex: 1; min-width: 0; justify-content: flex-end; }
-.status-item { display: flex; align-items: center; gap: 3px; font-size: 11px; color: var(--text-disabled); }
+.status-item { display: flex; align-items: center; gap: 3px; font-size: 11px; color: var(--text-muted, #666); }
 .status-item.active { color: var(--accent-success); }
 .status-item.disconnected { color: var(--accent-danger); }
 .status-item.starting { color: var(--accent-warning); }
 .status-item.error { color: var(--accent-danger); }
 .status-item.recording { color: var(--accent-danger); }
-.status-item.mode { color: var(--text-muted); }
+.status-item.mode { color: var(--text-muted, #888); }
 .status-item.mode.interactive { color: var(--accent-warning); }
 .status-icon { display: flex; align-items: center; }
-.ai-badge { font-size: 9px; padding: 1px 3px; background: var(--surface-2); color: var(--text-secondary); border-radius: 2px; font-weight: 600; }
+.ai-badge { font-size: 9px; padding: 1px 3px; background: var(--border-default); color: var(--text-secondary, #aaa); border-radius: 2px; font-weight: 600; }
 .recording-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent-danger); animation: pulse 1s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 </style>

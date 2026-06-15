@@ -44,8 +44,8 @@ const sections = getKeybindingCategories()
 }
 .dialog {
   width: 650px; max-width: 90vw; max-height: 80vh;
-  background: var(--bg-panel); border: 1px solid var(--border-default); border-radius: 12px;
-  box-shadow: var(--shadow-lg);
+  background: var(--bg-panel-solid); border: 1px solid var(--surface-hover); border-radius: 12px;
+  box-shadow: 0 16px 48px var(--shadow-lg);
   display: flex; flex-direction: column; overflow: hidden;
 }
 .dialog-header {
@@ -74,11 +74,11 @@ const sections = getKeybindingCategories()
 kbd {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 55px; height: 22px; padding: 0 6px;
-  background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 4px;
+  background: var(--border-default); border: 1px solid var(--border-default); border-radius: 4px;
   font-size: 10px; color: var(--text-secondary); font-family: 'Cascadia Code', monospace;
   white-space: nowrap;
 }
-.desc { font-size: 11px; color: var(--text-secondary); }
+.desc { font-size: 11px; color: var(--text-muted); }
 .dialog-body::-webkit-scrollbar { width: 4px; }
 .dialog-body::-webkit-scrollbar-track { background: transparent; }
 .dialog-body::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 2px; }

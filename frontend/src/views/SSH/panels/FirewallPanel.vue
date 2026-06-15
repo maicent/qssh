@@ -3,7 +3,7 @@
     <!-- 工具栏 -->
     <div class="fw-toolbar">
       <div class="fw-toolbar-left">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <svg class="icon-warning" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         <span class="fw-title">防火墙</span>
         <span v-if="fwInfo.type !== 'unknown'" class="fw-badge" :class="'fw-badge-' + fwInfo.status">
           {{ fwTypeName }} · {{ fwInfo.status === 'active' ? '运行中' : '已关闭' }}
@@ -34,7 +34,7 @@
 
       <!-- 未知防火墙 -->
       <div v-else-if="fwInfo.type === 'unknown'" class="fw-empty">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <svg class="icon-disabled" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         <p>未检测到支持的防火墙</p>
         <p class="fw-hint">支持 iptables / firewalld / ufw</p>
       </div>
@@ -348,6 +348,9 @@ onMounted(() => loadInfo())
 </script>
 
 <style scoped>
+.icon-warning { color: var(--warning-light); }
+.icon-disabled { color: var(--text-disabled); }
+
 .fw-panel {
   width: 100%; height: 100%;
   display: flex; flex-direction: column;
@@ -358,11 +361,11 @@ onMounted(() => loadInfo())
 .fw-toolbar {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border-default);
-  background: var(--surface-2);
+  border-bottom: 1px solid var(--surface-hover);
+  background: var(--toolbar-3);
   flex-shrink: 0;
 }
-.fw-toolbar-left { display: flex; align-items: center; gap: 0.5rem; color: var(--warning-light); }
+.fw-toolbar-left { display: flex; align-items: center; gap: 0.5rem; }
 .fw-toolbar-right { display: flex; gap: 0.375rem; }
 .fw-title { color: var(--text-primary); font-weight: 600; font-size: 0.875rem; }
 
@@ -376,7 +379,7 @@ onMounted(() => loadInfo())
 .fw-btn {
   display: inline-flex; align-items: center; gap: 0.375rem;
   padding: 0.375rem 0.75rem;
-  background: var(--surface-1);
+  background: var(--border-subtle);
   border: 1px solid var(--border-default);
   border-radius: 0.375rem;
   color: var(--text-secondary); font-size: 0.75rem;
@@ -387,9 +390,9 @@ onMounted(() => loadInfo())
 .fw-btn-sm { padding: 0.25rem 0.5rem; }
 .fw-btn-primary { background: var(--primary-bg); border-color: var(--border-accent); color: var(--primary-light); }
 .fw-btn-primary:hover:not(:disabled) { background: var(--primary-bg-hover); }
-.fw-btn-success { background: var(--success-bg); border-color: color-mix(in srgb, var(--accent-success), transparent 60%); color: var(--success-light); }
-.fw-btn-warn { background: var(--warning-bg); border-color: color-mix(in srgb, var(--warning-light), transparent 60%); color: var(--warning-light); }
-.fw-btn-danger { background: var(--danger-bg); border-color: color-mix(in srgb, var(--accent-danger), transparent 60%); color: var(--accent-danger); }
+.fw-btn-success { background: var(--success-bg); border-color: var(--border-success); color: var(--success-light); }
+.fw-btn-warn { background: var(--warning-bg); border-color: var(--border-warning); color: var(--warning-light); }
+.fw-btn-danger { background: var(--danger-bg); border-color: var(--border-danger); color: var(--accent-danger); }
 
 .fw-content { flex: 1; overflow-y: auto; min-height: 0; }
 
@@ -398,12 +401,12 @@ onMounted(() => loadInfo())
   height: 100%; gap: 0.75rem; color: var(--text-muted);
 }
 .fw-loading p, .fw-empty p, .fw-empty-rules p { margin: 0; font-size: 0.875rem; }
-.fw-hint { font-size: 0.75rem !important; color: var(--text-muted) !important; }
+.fw-hint { font-size: 0.75rem !important; color: var(--text-disabled) !important; }
 .fw-empty-rules { height: auto; padding: 2rem; }
 
 .fw-spinner {
   width: 24px; height: 24px;
-  border: 2px solid color-mix(in srgb, var(--warning-light), transparent 80%); border-top-color: var(--warning-light);
+  border: 2px solid var(--warning-bg); border-top-color: var(--warning-light);
   border-radius: 50%; animation: fw-spin 0.8s linear infinite;
 }
 @keyframes fw-spin { to { transform: rotate(360deg); } }
@@ -415,13 +418,13 @@ onMounted(() => loadInfo())
 .fw-table th {
   padding: 0.5rem 0.625rem; text-align: left;
   color: var(--text-secondary); font-weight: 600; white-space: nowrap;
-  border-bottom: 2px solid var(--border-default);
-  background: var(--surface-2);
+  border-bottom: 2px solid var(--surface-hover);
+  background: var(--toolbar-3);
   position: sticky; top: 0; z-index: 1;
 }
 .fw-table td {
   padding: 0.375rem 0.625rem;
-  color: var(--text-primary); border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary); border-bottom: 1px solid var(--surface-1);
   white-space: nowrap;
 }
 .fw-table tr:hover td { background: var(--bg-hover); }
@@ -430,7 +433,7 @@ onMounted(() => loadInfo())
 
 .fw-chain-tag {
   display: inline-block; padding: 0.0625rem 0.375rem;
-  background: color-mix(in srgb, var(--primary-light), transparent 90%); border-radius: 0.25rem;
+  background: var(--primary-bg); border-radius: 0.25rem;
   color: var(--primary-light); font-size: 0.625rem; font-weight: 600;
 }
 .fw-target-tag {
@@ -449,23 +452,23 @@ onMounted(() => loadInfo())
   padding: 0.5rem 0.75rem; color: var(--text-muted); font-size: 0.75rem;
   cursor: pointer; background: var(--surface-1);
 }
-.fw-raw-toggle:hover { background: var(--surface-2); }
+.fw-raw-toggle:hover { background: var(--surface-1); }
 .fw-raw {
   margin: 0; padding: 0.75rem;
   color: var(--text-secondary); font-size: 0.6875rem;
   font-family: 'Courier New', monospace; line-height: 1.5;
   white-space: pre; overflow-x: auto;
-  max-height: 30vh; background: var(--surface-1);
+  max-height: 30vh; background: var(--bg-input);
 }
 
 .fw-cmd-bar {
   display: flex; gap: 0.5rem; padding: 0.5rem 1rem;
   border-top: 1px solid var(--border-subtle);
-  background: var(--surface-2); flex-shrink: 0;
+  background: var(--toolbar-3); flex-shrink: 0;
 }
 .fw-cmd-input {
-  flex: 1; background: var(--bg-input);
-  border: 1px solid var(--border-default); border-radius: 0.375rem;
+  flex: 1; background: var(--bg-panel);
+  border: 1px solid var(--surface-hover); border-radius: 0.375rem;
   color: var(--text-primary); font-size: 0.75rem; font-family: 'Courier New', monospace;
   padding: 0.375rem 0.625rem; outline: none;
 }
@@ -474,8 +477,8 @@ onMounted(() => loadInfo())
 .fw-footer {
   display: flex; align-items: center;
   padding: 0.25rem 1rem;
-  border-top: 1px solid var(--border-default);
-  background: var(--surface-2);
+  border-top: 1px solid var(--surface-hover);
+  background: var(--toolbar-3);
   font-size: 0.625rem; flex-shrink: 0;
 }
 .fw-footer-info { color: var(--text-muted); }
@@ -489,7 +492,7 @@ onMounted(() => loadInfo())
   z-index: 10000; backdrop-filter: blur(4px);
 }
 .fw-modal {
-  background: var(--bg-panel-solid); border: 1px solid var(--border-default);
+  background: var(--bg-panel-solid); border: 1px solid var(--surface-hover);
   border-radius: 0.75rem; width: 400px; max-width: 90vw;
   box-shadow: var(--shadow-lg);
 }
@@ -508,7 +511,7 @@ onMounted(() => loadInfo())
 .fw-field label { display: block; color: var(--text-secondary); font-size: 0.75rem; margin-bottom: 0.25rem; }
 .fw-input {
   width: 100%; background: var(--bg-input);
-  border: 1px solid var(--border-default); border-radius: 0.375rem;
+  border: 1px solid var(--surface-hover); border-radius: 0.375rem;
   color: var(--text-primary); font-size: 0.8125rem; padding: 0.5rem 0.75rem;
   outline: none; box-sizing: border-box;
 }
